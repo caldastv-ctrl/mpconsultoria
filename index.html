@@ -113,7 +113,7 @@ h2{font-family:var(--f-d);font-size:19px;margin:0 0 12px}
 /* Empresas */
 .tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .tools input{flex:1;min-width:200px}
-input[type=text],input[type=search],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+input[type=text],input[type=search],input[type=password],input[type=date],input[type=time],input[type=number],input[type=month],input[type=email],input[type=url],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
 textarea{resize:vertical;min-height:64px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 .card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
@@ -509,7 +509,7 @@ document.addEventListener('click',function(ev){
   else if(act==='aunuevo')formAuto();
   else if(act==='auedit'){var ax=((S.auto||{})[activa().id]||[]).filter(function(x){return x.id===id})[0];if(ax)formAuto(ax)}
   else if(act==='auborrar'){if(confirm('¿Eliminar este flujo?')){S.auto[activa().id]=S.auto[activa().id].filter(function(x){return x.id!==id});save();renderMain()}}
-  else if(act==='gkguardar'){var g0=gk(),nk=$('#gk1').value.trim(),nm=$('#gk2').value.trim()||'gemini-3.8-flash';try{localStorage.setItem(GKEY,JSON.stringify({k:nk||g0.k||'',m:nm}));toast('Conexión guardada');renderMain()}catch(e){toast('No se pudo guardar en este navegador.')}}
+  else if(act==='gkguardar'){var g0=gk(),nk=$('#gk1').value.trim(),nm=$('#gk2').value.trim()||'gemini-3.8-flash';try{localStorage.setItem(GKEY,JSON.stringify(Object.assign({},g0,{k:nk||g0.k||'',m:nm,sinImg:nk?0:g0.sinImg})));toast(nk&&nk.length<30?'Guardada, pero esa clave parece incompleta: las de Google tienen unos 39 caracteres y empiezan por AIza.':'Conexión guardada');renderMain()}catch(e){toast('No se pudo guardar en este navegador.')}}
   else if(act==='gkquitar'){try{localStorage.removeItem(GKEY)}catch(e){}toast('Clave eliminada');renderMain()}
   else if(act==='gkprobar'){var g1=gk();if(!g1.k)return toast('Primero guarda la clave.');toast('Probando...');var pm=IAM.tipo;llamarGemini('Responde solo con la palabra: OK').then(function(){toast('Conexión correcta')},function(e){toast(e.message.slice(0,120))})}
   else if(act==='iacrear')crearIA();
@@ -527,6 +527,9 @@ document.addEventListener('click',function(ev){
   else if(act==='dsnew'){var dn=dsEmp(),an=activa(),nn=prompt('Nombre del diseño','Diseño '+(dn.list.length+1));if(nn){var c1=/^#[0-9a-f]{6}$/i.test(an.color)?an.color:'#7c5cff',nid='d'+uid();dn.list.push({id:nid,nombre:nn,fmt:'sq',slides:[{t:'Tu título',b:'',cta:'',c1:c1,c2:oscuro(c1),tc:'#ffffff',ts:96}]});dn.cur=nid;DS.i=0;save();pintarDis()}}
   else if(act==='dsdup'){var dd2=dsEmp(),cu=docDis(),cp2=JSON.parse(JSON.stringify(cu));cp2.id='d'+uid();cp2.nombre=cu.nombre+' (copia)';dd2.list.push(cp2);dd2.cur=cp2.id;save();pintarDis()}
   else if(act==='dsren'){var cu2=docDis(),nr=prompt('Nuevo nombre',cu2.nombre);if(nr){cu2.nombre=nr;save();pintarDis()}}
+  else if(act==='dsvarios'){var dv=dsEmp();abrirD2('Eliminar varios diseños','<p class="row-s" style="margin:0 0 8px">Marca los que quieras borrar.</p><div class="acts" style="margin-bottom:8px"><button class="btn sm" data-act="dsvtodos">Marcar todos</button><button class="btn sm del" data-act="dsvdel">Eliminar los marcados</button></div><div class="panel">'+dv.list.map(function(x){return '<label class="row" style="cursor:pointer"><input type="checkbox" data-dsv="'+x.id+'" style="width:auto"><span class="row-main">'+esc(x.nombre)+'</span><span class="row-s">'+x.slides.length+' diapositivas</span></label>'}).join('')+'</div>')}
+  else if(act==='dsvtodos'){document.querySelectorAll('[data-dsv]').forEach(function(c){c.checked=true})}
+  else if(act==='dsvdel'){var sel=Array.prototype.slice.call(document.querySelectorAll('[data-dsv]:checked')).map(function(c){return c.getAttribute('data-dsv')});if(!sel.length)return toast('Marca al menos uno.');if(!confirm('¿Eliminar '+sel.length+' diseños? No se puede deshacer.'))return;var dw=dsEmp();dw.list=dw.list.filter(function(x){return sel.indexOf(x.id)<0});if(!dw.list.length){var nid='d'+uid();dw.list=[{id:nid,nombre:'Diseño 1',fmt:'sq',slides:generarDis(activa())}]}if(!dw.list.some(function(x){return x.id===dw.cur}))dw.cur=dw.list[0].id;DS.i=0;save();$('#dlg2').close();pintarDis();toast('Diseños eliminados')}
   else if(act==='dsdel'){var de2=dsEmp();if(de2.list.length<2)return toast('Debe quedar al menos un diseño.');if(confirm('¿Eliminar este diseño?')){de2.list=de2.list.filter(function(x){return x.id!==de2.cur});de2.cur=de2.list[0].id;DS.i=0;save();pintarDis()}}
   else if(act==='esel'){DS.i=Number(id);pintarDis()}
   else if(act==='enew'){var dn=docDis(),pr=dn.slides[DS.i];dn.slides.push({t:'Nuevo título',b:'',cta:'',c1:pr.c1,c2:pr.c2,tc:pr.tc,ts:96});DS.i=dn.slides.length-1;save();pintarDis()}
@@ -553,7 +556,9 @@ document.addEventListener('click',function(ev){
   else if(act==='gverp')verProyecto(id);
   else if(act==='gverg')verGuion(Number(id));
   else if(act==='gnuevo')nuevoGuion();
-  else if(act==='gborrar'){if(confirm('¿Eliminar este guion?')){S.guiones=(S.guiones||[]).filter(function(x){return x.id!==id});save();cargarGV()}}
+  else if(act==='gborrar'){if(confirm('¿Eliminar este guion?')){var antes=(S.guiones||[]).length;S.guiones=(S.guiones||[]).filter(function(x){return x.id!==id});if(S.guiones.length===antes){S.ocultos=S.ocultos||{};S.ocultos[id]=true}save();cargarGV()}}
+  else if(act==='gdel'){if(confirm('¿Eliminar este proyecto? No se puede deshacer.')){quitarProy([id]);cargarGV()}}
+  else if(act==='gvaciar'){var ids=GVD.proj.filter(function(x){return estadoDe(x)===id}).map(function(x){return x.id});if(ids.length&&confirm('¿Eliminar los '+ids.length+' proyectos de esta columna? No se puede deshacer.')){quitarProy(ids);cargarGV()}}
   else if(act==='cerrar2')$('#dlg2').close();
   else if(act==='copiar'){var tx=decodeURIComponent(b.getAttribute('data-t')||'');(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(function(){toast('Copiado')},function(){toast('No se pudo copiar. Selecciona el texto y copia a mano.')})}
   else if(act==='olvide')olvide();
@@ -601,9 +606,15 @@ function cargarGV(){
       (nd.datos.workspaces||[]).forEach(function(w){if(vn[w.id]===a.id)(w.scripts||[]).forEach(function(x){D.scripts.push({id:x.id,titulo:x.title,plataforma:x.platform,gancho:x.hook,cuerpo:x.body,cta:x.cta,texto:x.caption,origen:'Nadine'})})});
     }
     ((S.proyectos||{})[a.id]||[]).forEach(function(x){D.proj.push(x)});
+    D.proj=D.proj.filter(function(x){return !(S.ocultos||{})[x.id]});
     (S.guiones||[]).filter(function(g){return g.empresa===a.id}).forEach(function(g){D.scripts.unshift(g)});
-    GVD=D;pintarGV();
+    D.scripts=D.scripts.filter(function(x){return !(S.ocultos||{})[x.id]});GVD=D;pintarGV();
   });
+}
+function quitarProy(ids){
+  var a=activa(),own=(S.proyectos||{})[a.id]||[];
+  ids.forEach(function(id){var n=own.length;own=own.filter(function(x){return x.id!==id});if(own.length===n){S.ocultos=S.ocultos||{};S.ocultos[id]=true}});
+  S.proyectos=S.proyectos||{};S.proyectos[a.id]=own;save();
 }
 function estadoDe(p){var e=(S.estados||{})[p.id]||p.estado;return ESTADOS.some(function(x){return x[0]===e})?e:'idea'}
 function pintarGV(){
@@ -616,17 +627,17 @@ function pintarGV(){
     if(!GVD.proj.length){b.innerHTML='<div class="empty"><b>Sin proyectos</b>Esta empresa no tiene proyectos de producción importados.</div>';return}
     b.innerHTML='<div class="kan">'+ESTADOS.map(function(es,i){
       var ps=GVD.proj.filter(function(p){return estadoDe(p)===es[0]});
-      return '<div class="kcol"><h3>'+es[1]+'<span class="row-s">'+ps.length+'</span></h3>'+ps.map(function(p){
+      return '<div class="kcol"><h3>'+es[1]+'<span class="row-s">'+ps.length+(ps.length?' <button class="btn sm del" data-act="gvaciar" data-id="'+es[0]+'">Vaciar</button>':'')+'</span></h3>'+ps.map(function(p){
         return '<div class="kc"><b>'+esc(p.titulo)+'</b><div class="row-s">'+esc(p.tipo||'')+(p.duracion?' · '+p.duracion+' s':'')+'</div><div class="acts">'+
           (i>0?'<button class="btn sm" data-act="gmover" data-id="'+esc(p.id)+'" data-d="-1" aria-label="Mover atrás">&larr;</button>':'')+
           '<button class="btn sm" data-act="gverp" data-id="'+esc(p.id)+'">Abrir</button>'+
-          (i<4?'<button class="btn sm" data-act="gmover" data-id="'+esc(p.id)+'" data-d="1" aria-label="Mover adelante">&rarr;</button>':'')+'</div></div>';
+          (i<4?'<button class="btn sm" data-act="gmover" data-id="'+esc(p.id)+'" data-d="1" aria-label="Mover adelante">&rarr;</button>':'')+'</div><div class="acts"><button class="btn sm del" data-act="gdel" data-id="'+esc(p.id)+'">Eliminar</button></div></div>';
       }).join('')+'</div>';
     }).join('')+'</div>';
   }else{
     if(!GVD.scripts.length){b.innerHTML='<div class="empty"><b>Sin guiones</b>Crea uno con "Nuevo guion" o importa tus respaldos en Ajustes.</div>';return}
     b.innerHTML='<div class="grid">'+GVD.scripts.map(function(g,i){
-      return '<article class="card"><div><div class="row-t">'+esc(g.titulo)+'</div><div class="row-s">'+esc(g.plataforma||'')+(g.origen?' · '+g.origen:' · Creado aquí')+'</div></div><div class="row-s">'+esc((g.gancho||'').slice(0,140))+'</div><div class="acts"><button class="btn sm pri" data-act="gverg" data-id="'+i+'">Abrir</button>'+(g.origen?'':'<button class="btn sm del" data-act="gborrar" data-id="'+esc(g.id)+'">Eliminar</button>')+'</div></article>';
+      return '<article class="card"><div><div class="row-t">'+esc(g.titulo)+'</div><div class="row-s">'+esc(g.plataforma||'')+(g.origen?' · '+g.origen:' · Creado aquí')+'</div></div><div class="row-s">'+esc((g.gancho||'').slice(0,140))+'</div><div class="acts"><button class="btn sm pri" data-act="gverg" data-id="'+i+'">Abrir</button>'+'<button class="btn sm del" data-act="gborrar" data-id="'+esc(g.id)+'">Eliminar</button>'+'</div></article>';
     }).join('')+'</div>';
   }
 }
@@ -917,7 +928,7 @@ function pintarDis(){
   var chips=d.slides.map(function(x,k){return '<button data-act="esel" data-id="'+k+'" class="'+(k===i?'on':'')+'">'+(k+1)+'</button>'}).join('');
   var fl=function(l,k,v,t){return '<div class="f"><label>'+l+'</label>'+(t==='ta'?'<textarea data-ds="'+k+'">'+esc(v)+'</textarea>':'<input type="text" data-ds="'+k+'" value="'+esc(v)+'">')+'</div>'};
   var de=dsEmp();
-  b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="f"><label>Diseño</label><select data-dsd>'+de.list.map(function(x){return '<option value="'+x.id+'"'+(x.id===de.cur?' selected':'')+'>'+esc(x.nombre)+'</option>'}).join('')+'</select><div class="acts" style="margin-top:6px"><button class="btn sm" data-act="dsnew">Nuevo</button><button class="btn sm" data-act="dsdup">Duplicar</button><button class="btn sm" data-act="dsren">Renombrar</button><button class="btn sm del" data-act="dsdel">Eliminar</button></div></div><div class="f"><label>Formato</label><select data-dsf>'+Object.keys(FMTS).map(function(k){return '<option value="'+k+'"'+(k===d.fmt?' selected':'')+'>'+FMTS[k][2]+'</option>'}).join('')+'</select></div>'+
+  b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="f"><label>Diseño</label><select data-dsd>'+de.list.map(function(x){return '<option value="'+x.id+'"'+(x.id===de.cur?' selected':'')+'>'+esc(x.nombre)+'</option>'}).join('')+'</select><div class="acts" style="margin-top:6px"><button class="btn sm" data-act="dsnew">Nuevo</button><button class="btn sm" data-act="dsdup">Duplicar</button><button class="btn sm" data-act="dsren">Renombrar</button><button class="btn sm del" data-act="dsdel">Eliminar</button><button class="btn sm del" data-act="dsvarios">Eliminar varios</button></div></div><div class="f"><label>Formato</label><select data-dsf>'+Object.keys(FMTS).map(function(k){return '<option value="'+k+'"'+(k===d.fmt?' selected':'')+'>'+FMTS[k][2]+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label>Diapositivas</label><div class="tabs" style="flex-wrap:wrap;margin:0">'+chips+'<button data-act="enew" aria-label="Nueva diapositiva">+</button></div></div>'+
    '<div class="acts" style="margin-bottom:12px"><button class="btn sm" data-act="eleft" aria-label="Mover a la izquierda">&larr;</button><button class="btn sm" data-act="eright" aria-label="Mover a la derecha">&rarr;</button><button class="btn sm" data-act="edup">Duplicar</button><button class="btn sm del" data-act="edel">Eliminar</button></div>'+
    fl('Título','t',sl.t,'ta')+fl('Texto','b',sl.b,'ta')+fl('Botón o llamado a la acción','cta',sl.cta)+
@@ -1059,7 +1070,7 @@ function gkPanel(){
    '<div class="f"><label for="gk1">Clave de API de Google AI Studio</label><input type="password" id="gk1" autocomplete="off" placeholder="'+(g.k?'Clave guardada en este navegador. Escribe otra para cambiarla.':'Pega aquí tu clave')+'"></div>'+
    '<div class="f"><label for="gk2">Modelo</label><input type="text" id="gk2" value="'+esc(g.m||'gemini-3.8-flash')+'"><small>Si Google cambia el nombre del modelo, cámbialo aquí.</small></div>'+
    '<div class="acts"><button class="btn pri" data-act="gkguardar">Guardar</button><button class="btn" data-act="gkprobar">Probar conexión</button>'+(g.k?'<button class="btn del" data-act="gkquitar">Quitar clave</button>':'')+'</div>'+
-   '<small>La clave se guarda solo en este navegador y no va en los respaldos. Pégala en cada equipo donde trabajes.</small></div></div>';
+   '<small>¿Dónde la saco? Entra a <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--acc)">aistudio.google.com/apikey</a>, pulsa <b>Create API key</b>, cópiala y pégala aquí. No necesitas licencia: la clave es gratuita y empieza por <b>AIza</b>.<br>La clave se guarda solo en este navegador y no va en los respaldos. Pégala en cada equipo donde trabajes.</small></div></div>';
 }
 function modelosFlash(k){
   return fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':k}}).then(function(r){return r.json()}).then(function(j){
@@ -1713,7 +1724,7 @@ function fondoTema(c,W,H,tema,v,seed,pal){
 }
 function abrirFondos(){
   var a=activa(),sug=temaSugerido(a);FD.tema=sug;FD.emo=FD.emo||'⭐';
-  abrirD2('Fondos automáticos','<p class="row-s" style="margin:0 0 10px">Fondos originales que genera el programa con los colores de '+esc(a.nombre)+'. No tienen derechos de autor.</p><div class="f"><label for="fdTema">Estilo</label><select id="fdTema"><option value="abs">Abstractos (colores de la marca)</option>'+Object.keys(THEMES).map(function(k){return '<option value="'+k+'"'+(k===sug?' selected':'')+'>'+THEMES[k].n+(k===sug?' (sugerido)':'')+'</option>'}).join('')+'</select></div><div class="f" id="fdEmoBox" hidden><label for="fdEmo">Escribe un emoji o símbolo (por ejemplo 🌮 ⚽ 🐶 💇 ✂️)</label><input type="text" id="fdEmo" maxlength="4" value="'+esc(FD.emo)+'"></div><div class="acts" style="margin:10px 0"><label class="row" style="border:0;padding:0"><input type="checkbox" id="fdTodas" style="width:auto"><span>Aplicar a todas las diapositivas</span></label><button class="btn sm" data-act="fdmas">Más opciones</button><button class="btn sm pri" data-act="fdia">Crear uno con IA</button></div><div id="fdG" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div><div id="fdIA"></div>');
+  abrirD2('Fondos automáticos','<p class="row-s" style="margin:0 0 10px">Fondos originales que genera el programa con los colores de '+esc(a.nombre)+'. No tienen derechos de autor.</p><div class="f"><label for="fdTema">Estilo</label><select id="fdTema"><option value="abs">Abstractos (colores de la marca)</option>'+Object.keys(THEMES).map(function(k){return '<option value="'+k+'"'+(k===sug?' selected':'')+'>'+THEMES[k].n+(k===sug?' (sugerido)':'')+'</option>'}).join('')+'</select></div><div class="f" id="fdEmoBox" hidden><label for="fdEmo">Escribe un emoji o símbolo (por ejemplo 🌮 ⚽ 🐶 💇 ✂️)</label><input type="text" id="fdEmo" maxlength="4" value="'+esc(FD.emo)+'"></div><div class="acts" style="margin:10px 0"><label class="row" style="border:0;padding:0"><input type="checkbox" id="fdTodas" style="width:auto"><span>Aplicar a todas las diapositivas</span></label><button class="btn sm" data-act="fdmas">Más opciones</button><button class="btn sm pri" data-act="fdia">Crear uno con IA'+(gk().sinImg?' (requiere facturación)':'')+'</button></div><div id="fdG" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div><div id="fdIA"></div>');
   pintarFondos();
 }
 function pintarFondos(){
@@ -1762,7 +1773,7 @@ function generarFondoIA(){
   (g.i?Promise.resolve(g.i):modeloImagen(g.k)).then(function(mod){
     if(!mod)throw new Error('Tu clave no muestra un modelo de imágenes disponible. Usa los fondos automáticos o sube una imagen.');
     return conReintento(function(){return pedirImagen(mod,g,pr+' Sin texto, sin letras, sin personas y sin logotipos. Imagen limpia, pensada como fondo.')}).then(function(u){if(g.i!==mod){g.i=mod;try{localStorage.setItem(GKEY,JSON.stringify(g))}catch(x){}}return u});
-  }).then(reducirJpg).then(guardarFondo).catch(function(e){m.style.color='var(--bad)';m.textContent=e.message});
+  }).then(reducirJpg).then(guardarFondo).catch(function(e){m.style.color='var(--bad)';m.textContent=e.message;if(e.cuota&&/límite es 0/.test(e.message)){var g2=gk();g2.sinImg=1;try{localStorage.setItem(GKEY,JSON.stringify(g2))}catch(x){}}});
 }
 /* Fondo de la aplicación */
 var FA={seed:1,key:'',url:''},PAL_APP=['#0b1220','#1e3a8a','#f5b83d','#fff3d6'];

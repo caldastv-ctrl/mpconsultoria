@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="google" content="notranslate">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b1120">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MPCONSULTORIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,6 +85,10 @@ button{cursor:pointer}
 .ed input[type=range]{width:100%;padding:0}
 @media (max-width:900px){.ed{grid-template-columns:1fr}}
 @media print{:root{--bg:#fff;--side:#fff;--surf:#fff;--surf2:#f2f2f2;--line:#ccc;--tx:#111;--mut:#555}.side,.topbar,.tools,.scrim,.toast{display:none!important}.app{display:block}.main{padding:0}}
+.hl{background:rgba(245,184,61,.2);color:var(--acc-t);padding:0 4px;border-radius:6px}.hl2{background:rgba(62,207,158,.18);color:var(--ok)}
+.sg-h{background:rgba(245,184,61,.18);color:var(--acc-t);border-radius:6px;padding:0 3px}.sg-c{background:rgba(62,207,158,.16);color:var(--ok);border-radius:6px;padding:0 3px}.sg-a{color:var(--mut);font-size:.88em}
+.rtog{cursor:pointer;border:1px solid var(--line);background:var(--surf);color:var(--mut);font-size:12px;border-radius:20px;padding:3px 10px}.rtog.on{background:rgba(245,184,61,.18);color:var(--acc-t);border-color:var(--acc);font-weight:700}
+.insight{border-left:3px solid var(--acc);padding:8px 12px;background:var(--surf2);border-radius:8px;margin:6px 0}.insight.ok{border-color:var(--ok)}.insight.mal{border-color:var(--bad)}
 .pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;margin:4px 0 10px}
 .vb{display:block!important}
 .vb h3{font-family:var(--f-d);margin:14px 0 4px;font-size:16px}
@@ -181,7 +189,7 @@ input[type=color]{width:56px;height:38px;padding:2px;background:var(--bg);border
     </div>
     <div class="switch" id="switch"></div>
     <nav class="nav" id="nav"></nav>
-    <div class="side-foot"><button type="button" class="btn sm" data-act="bloquear">Bloquear</button> <button type="button" class="btn sm" data-act="tema" id="btnTema">Tema claro</button><button type="button" class="btn sm pri" data-act="terminar" style="margin-top:10px;width:100%">Terminar y guardar</button><div style="margin-top:10px">Los datos se guardan en este navegador.</div></div>
+    <div class="side-foot"><button type="button" class="btn sm" data-act="bloquear">Bloquear</button> <button type="button" class="btn sm" data-act="tema" id="btnTema">Tema claro</button><button type="button" class="btn sm" data-act="instalar" id="btnInst" hidden style="margin-top:10px;width:100%">Instalar aplicación</button><button type="button" class="btn sm pri" data-act="terminar" style="margin-top:10px;width:100%">Terminar y guardar</button><div style="margin-top:10px">Los datos se guardan en este navegador.</div></div>
   </aside>
   <div class="scrim" id="scrim"></div>
   <div>
@@ -364,12 +372,12 @@ function vAjustes(){
    '<div class="f"><label for="c2">Repite la clave nueva</label><input type="password" id="c2" autocomplete="new-password" required></div>'+
    '<div><button type="submit" class="btn pri">Cambiar clave</button></div></form></div>'+
    '<h2>Respaldo</h2><div class="panel">'+
-   '<div class="row"><div class="row-main"><div class="row-t">Exportar respaldo</div><div class="row-s">Descarga un archivo con todas tus empresas y logos. '+(u?'Último respaldo: '+esc(fmtFecha(u))+'.':'Aún no has descargado ningún respaldo.')+'</div><label class="row-s" style="display:block;margin-top:6px"><input type="checkbox" data-resclaves style="width:auto"'+(clavesIncl()?' checked':'')+'> Incluir mis claves (Gemini y de acceso) para abrir sin complicaciones en mis equipos. No compartas este archivo con nadie.</label></div><button class="btn pri" data-act="exportar">Descargar respaldo</button></div>'+
-   '<div class="row"><div class="row-main"><div class="row-t">Restaurar respaldo</div><div class="row-s">Reemplaza los datos actuales por los del archivo. La clave de este navegador no cambia.</div></div><label class="btn" for="rf" style="cursor:pointer">Elegir archivo</label><input type="file" id="rf" accept=".json,application/json" hidden></div></div>'+
+   '<div class="row"><div class="row-main"><div class="row-t">Exportar respaldo</div><div class="row-s">Descarga un archivo con todas tus empresas y logos. '+(u?'Último respaldo: '+esc(fmtFecha(u))+'.':'Aún no has descargado ningún respaldo.')+'</div><label class="row-s" style="display:block;margin-top:6px"><input type="checkbox" data-resclaves style="width:auto"'+(clavesIncl()?' checked':'')+'> Incluir mis claves (Gemini y de acceso) para abrir sin complicaciones en mis equipos. No compartas este archivo con nadie.</label></div><div class="acts"><button class="btn pri" data-act="exportar">Descargar respaldo</button><button class="btn sm" data-act="exportarl">Liviano para correo</button><button class="btn sm" data-act="compartir">Compartir…</button></div></div>'+
+   '<div class="row"><div class="row-main"><div class="row-t">Restaurar respaldo</div><div class="row-s">Carga el archivo de otro equipo y te deja elegir: combinar (no borra nada) o reemplazar. La clave de este navegador no cambia.</div></div><label class="btn" for="rf" style="cursor:pointer">Elegir archivo</label><input type="file" id="rf" accept=".json,application/json" hidden></div></div>'+
    marcaPanel()+nubePanel()+gkPanel()+'<h2>Importar datos de las apps anteriores</h2><div class="panel">'+filasFuentes()+
    '<div class="row"><div class="row-main"><div class="row-t">Importar respaldos</div><div class="row-s">Elige los archivos .json de tus apps; puedes seleccionar varios a la vez. Las empresas se unen por nombre y solo se llenan los datos vacíos de cada ficha. El contenido original se conserva completo para los módulos.</div></div><label class="btn pri" for="imf" style="cursor:pointer">Elegir archivos</label><input type="file" id="imf" accept=".json,application/json" multiple hidden></div></div>'+
    informeHtml()+
-   '<p class="hint">La clave protege el acceso en este navegador. La sincronización entre equipos llega en la etapa 3.</p>';
+   hintFinal();
 }
 function renderMain(){
   var r=route(),h=r==='inicio'?vInicio():r==='empresas'?vEmpresas():r==='ajustes'?vAjustes():r==='guiones'?vGuiones():r==='planificador'?vPlan():r==='diagnostico'?vDiag():r==='comparativo'?vComp():r==='diseno'?vDis():r==='estadisticas'?vEst():r==='contenido'?vIA():r==='automatizacion'?vAuto():r==='textos'?vTextos():vModulo(r);
@@ -403,7 +411,7 @@ function openForm(id){
    '<div class="f w"><label for="f_dif">Lo que la hace diferente</label><textarea id="f_dif" name="diferenciales" placeholder="Separado por coma">'+esc(e.diferenciales)+'</textarea></div>'+
    '<div class="f"><label for="f_pub">Público</label><input type="text" id="f_pub" name="publico" placeholder="Ej: familias de Caldas" value="'+esc(e.publico)+'"></div>'+
    '<div class="f"><label for="f_tono">Tono de comunicación</label><select id="f_tono" name="tono">'+opts(TONOS,e.tono)+'</select></div>'+
-   '<div class="f"><label for="f_obj">Objetivo principal</label><select id="f_obj" name="objetivo">'+opts(['Vender más','Ganar seguidores','Dar a conocer la marca','Fidelizar clientes'],e.objetivo)+'</select></div>'+
+   '<div class="f"><label for="f_obj">Objetivo principal</label><select id="f_obj" name="objetivo">'+opts(['Vender más','Ganar seguidores','Dar a conocer la marca','Fidelizar clientes'],e.objetivo)+'</select></div>'+'<div class="f"><label for="f_nic">Tipo de servicio (para guiones y comparativo)</label><select id="f_nic" name="nicho"><option value="">Automático según la ficha</option>'+Object.keys(NICHOS).map(function(k){return '<option value="'+k+'"'+(e.nicho===k?' selected':'')+'>'+NICHOS[k]+'</option>'}).join('')+'</select></div>'+'<div class="f"><label for="f_reg">Región y acento</label><select id="f_reg" name="region"><option value="">Automática según la ciudad</option>'+Object.keys(REG).map(function(k){return '<option value="'+k+'"'+(e.region===k?' selected':'')+'>'+REG[k].n+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label for="f_fb">Facebook</label><input type="text" id="f_fb" name="facebook" placeholder="Enlace o usuario" value="'+esc(e.facebook)+'"></div>'+
    '<div class="f"><label for="f_ig">Instagram</label><input type="text" id="f_ig" name="instagram" placeholder="@usuario" value="'+esc(e.instagram)+'"></div>'+
    '<div class="f"><label for="f_tt">TikTok</label><input type="text" id="f_tt" name="tiktok" placeholder="@usuario" value="'+esc(e.tiktok)+'"></div>'+
@@ -465,6 +473,21 @@ document.addEventListener('click',function(ev){
   else if(act==='bloquear')bloquear();
   else if(act==='exportar')exportar();
   else if(act==='terminar')terminarDia();
+  else if(act==='exportarl')exportar(true);
+  else if(act==='compartir')compartirRespaldo();
+  else if(act==='instalar'){if(DEFER){DEFER.prompt();DEFER=null;var bi=$('#btnInst');if(bi)bi.hidden=true}}
+  else if(act==='nppreset'){var an=activa(),lp=listaTxt(an.productos);NP.tipo='Reel / TikTok / Short';NP.dur=pick(['30','45']);NP.clip='8';NP.atm=pick(NP_OPT.atm.slice(1));NP.tema=pick(VIRAL).replace('{p}',pick(lp.length?lp:[an.tipo||'tu negocio'])).replace('{c}',an.ciudad||'tu ciudad');pintarGV();toast('Preset viral aplicado')}
+  else if(act==='vzusar'){VZ.texto=VG_ACT;VZ.proy='';var dl=$('#dlg2');if(dl&&dl.open)dl.close();GV.tab='voz';pintarGV();toast('Texto cargado en Voz')}
+  else if(act==='vpromptsveo'){var tv=(VG_RES&&VG_RES.escenas||[]).map(function(e,i){return 'Escena '+(i+1)+':\n'+(e.prompt_veo||'')}).join('\n\n');(navigator.clipboard?navigator.clipboard.writeText(tv):Promise.reject()).then(function(){toast('Prompts de Veo copiados')},function(){toast('No se pudo copiar.')})}
+  else if(act==='flow'){window.open('https://labs.google/fx/tools/flow','_blank','noopener');toast('Pega allí los prompts de Veo. Si el enlace cambia, busca "Google Flow".')}
+  else if(act==='rcomb')terminarRestauro('comb');
+  else if(act==='rrepl')terminarRestauro('repl');
+  else if(act==='ptcrear'){var ap=activa();PT.res=[];PT.meta=[];for(var q=0;q<4;q++){var tx=crearGuionOffline(ap,PT.dur,PT.reg,PT.nicho);if(PT.res.indexOf(tx)<0){PT.res.push(tx);PT.meta.push({reg:regionDe(ap,PT.reg),nicho:nichoDe(ap,PT.nicho)})}}pintarGV()}
+  else if(act==='ptregtog'){var ix=PT.regs.indexOf(id);if(ix<0)PT.regs.push(id);else PT.regs.splice(ix,1);pintarGV()}
+  else if(act==='ptcrearr'){var ap2=activa();if(!PT.regs.length)return toast('Marca al menos una región.');PT.res=[];PT.meta=[];PT.regs.forEach(function(rk){PT.res.push(crearGuionOffline(ap2,PT.dur,rk,PT.nicho));PT.meta.push({reg:rk,nicho:nichoDe(ap2,PT.nicho)})});pintarGV()}
+  else if(act==='ptvoz'){VZ.texto=PT.res[Number(id)];VZ.proy='';var mv=PT.meta[Number(id)];if(mv&&REG[mv.reg])VZ.acento=REG[mv.reg].n;GV.tab='voz';pintarGV();toast('Texto cargado en Voz')}
+  else if(act==='ptguardar'){var ag4=activa();S.guiones=S.guiones||[];S.guiones.push({id:uid(),empresa:ag4.id,titulo:tituloPT(Number(id)),plataforma:'Cuña o reel',gancho:PT.res[Number(id)].split('. ')[0],cuerpo:PT.res[Number(id)],cta:''});save();toast('Guardado en Guiones')}
+  else if(act==='encarpeta'){if(!window.showDirectoryPicker)return toast('Usa Chrome o Edge en computador para elegir una carpeta.');window.showDirectoryPicker().then(function(h){return leerCarpetaVideo(h)}).catch(function(){})}
   else if(act==='musprev'){if(!EN.mus)return toast('Primero elige una pista.');previewMus(EN.mus)}
   else if(act==='musstop')previewMus('');
   else if(act==='musdl'){if(!EN.mus)return toast('Primero elige una pista.');toast('Generando la pista...');setTimeout(function(){var AC0=new (window.AudioContext||window.webkitAudioContext)(),bf=musicaSint(AC0,EN.mus,60);bajar(bufAWav(bf),'musica-'+EN.mus+'.wav');try{AC0.close()}catch(e){}toast('Pista descargada (1 minuto, WAV)')},50)}
@@ -553,8 +576,10 @@ document.addEventListener('click',function(ev){
   else if(act==='egen'){if(confirm('Se reemplazarán las diapositivas actuales por un carrusel nuevo hecho con la ficha. ¿Continuar?')){var ag=activa();docDis().slides=generarDis(ag);docDis().auto=1;DS.i=0;save();pintarDis()}}
   else if(act==='epng')bajarPng();
   else if(act==='ezip')bajarZip();
-  else if(act==='cmes'){movMes(Number(id));renderMain()}
+  else if(act==='cmes'){renderMain()}
   else if(act==='cexport')csvComp();
+  else if(act==='cptab'){CP.tab=id;renderMain()}
+  else if(act==='cpmet'){CP.met=id;renderMain()}
   else if(act==='dedit'){if(DGD&&activa())formDiag()}
   else if(act==='dinforme')verInforme();
   else if(act==='dtnueva'){if(DGD)nuevaTarea()}
@@ -604,7 +629,7 @@ var ESTADOS=[['idea','Idea'],['guion','Guion'],['produccion','Producción'],['li
 function vGuiones(){
   var a=activa();
   return '<header class="ph"><div><h1>Guiones y voz</h1><p class="sub">'+(a?'Proyectos y guiones de '+esc(a.nombre)+'.':'Elige una empresa para ver sus guiones.')+'</p></div><button class="btn pri" data-act="gnuevo">Nuevo guion</button></header>'+
-   '<div class="tabs" style="flex-wrap:wrap">'+[['prod','Producción'],['nuevo','Nuevo proyecto'],['lote','Lote'],['voz','Voz'],['ens','Ensamblar'],['guiones','Guiones']].map(function(t){return '<button data-act="gtab" data-id="'+t[0]+'" class="'+(GV.tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div><div id="gvBody"><p class="sub">Cargando...</p></div>';
+   '<div class="tabs" style="flex-wrap:wrap">'+[['prod','Producción'],['nuevo','Nuevo proyecto'],['plant','Plantillas'],['lote','Lote'],['voz','Voz'],['ens','Ensamblar'],['guiones','Guiones']].map(function(t){return '<button data-act="gtab" data-id="'+t[0]+'" class="'+(GV.tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div><div id="gvBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarGV(){
   var a=activa();if(!a)return;
@@ -634,6 +659,7 @@ function estadoDe(p){var e=(S.estados||{})[p.id]||p.estado;return ESTADOS.some(f
 function pintarGV(){
   var b=$('#gvBody');if(!b||!GVD)return;
   if(GV.tab==='nuevo'){pintarNP(b);return}
+  if(GV.tab==='plant'){pintarPlant(b);return}
   if(GV.tab==='lote'){pintarLote(b);return}
   if(GV.tab==='voz'){pintarVoz(b);return}
   if(GV.tab==='ens'){pintarEns(b);return}
@@ -660,7 +686,7 @@ function bloque(t,x){return x?'<h3>'+t+' '+cp(x)+'</h3><div class="pre">'+esc(x)
 function abrirD2(t,h){$('#d2t').textContent=t;$('#d2b').innerHTML=h;$('#dlg2').showModal()}
 function verProyecto(id){
   var p=GVD.proj.filter(function(x){return x.id===id})[0];if(!p)return;
-  var r=p.resultado||{},k=r.kit||{},h='';
+  var r=p.resultado||{},k=r.kit||{},h=(r.escenas||[]).some(function(e){return e.locucion})?vistaGuion(r,activa()):'';
   h+=bloque('Gancho',r.gancho)+bloque('Personaje y ambiente (ancla visual)',r.ancla_visual);
   (r.escenas||[]).forEach(function(e){
     h+='<h3>Escena '+esc(e.n)+(e.duracion?' · '+e.duracion+' s':'')+'</h3>'+bloque('Locución',e.locucion)+bloque('Texto en pantalla',e.texto_pantalla)+bloque('Visual',e.visual)+bloque('Prompt de video',e.prompt_veo)+bloque('Prompt de imagen',e.prompt_imagen);
@@ -852,53 +878,149 @@ document.addEventListener('submit',function(ev){
   guardarDiag(function(o){var id=o.tareas.reduce(function(m,t){return Math.max(m,Number(t.id)||0)},0)+1;o.tareas.push({id:id,titulo:$('#t1').value.trim(),desc:$('#t2').value.trim(),estado:'todo'})});
   $('#dlg2').close();toast('Tarea agregada');
 });
-/* Módulo Comparativo */
-var CPD=null;
+/* Módulo Comparativo (reorganizado: resumen del mes, frente al sector y plataformas) */
+var CP={mes:'',tab:'mes',met:'seg'},CPD=null,COLC=['#f5b83d','#22d3ee','#ff6fa5','#a3e635','#a78bfa','#fb923c','#60a5fa','#34d399'];
 function vComp(){
-  return '<header class="ph"><div><h1>Comparativo</h1><p class="sub">Resultados de todas tus empresas en '+esc(nombreMes(PL.mes))+'.</p></div><div class="tools" style="margin:0"><button class="btn" data-act="cmes" data-id="-1" aria-label="Mes anterior">&larr;</button><button class="btn" data-act="cmes" data-id="1" aria-label="Mes siguiente">&rarr;</button><button class="btn pri" data-act="cexport">Descargar Excel (CSV)</button></div></header><div id="cpBody"><p class="sub">Cargando...</p></div>';
+  return '<header class="ph"><div><h1>Comparativo</h1><p class="sub" id="cpSub">Resultados de todas tus empresas'+(CP.mes?' en '+esc(nombreMes(CP.mes)):'')+'.</p></div><div class="tools" style="margin:0"><select id="cpMes" style="width:auto" aria-label="Mes"></select><button class="btn" data-act="cexport">Excel (CSV)</button><button class="btn pri" data-act="esprint">Informe PDF</button></div></header>'+
+   '<div class="tabs" style="flex-wrap:wrap">'+[['mes','Resumen del mes'],['lect','Lectura rápida'],['sector','Frente al sector'],['plat','Plataformas'],['grp','Tipo y región'],['evo','Evolución']].map(function(t){return '<button data-act="cptab" data-id="'+t[0]+'" class="'+(CP.tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div><div id="cpBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarCP(){
   Promise.all([kvGet('legacy:hmpi'),kvGet('legacy:nadine')]).catch(function(){return [null,null]}).then(function(r){
-    var h=r[0],nd=r[1],filas=[];
-    S.empresas.forEach(function(e){
-      var base={},bm=BM_DEF;
+    var h=r[0],nd=r[1],filas=[],meses={};
+    S.empresas.forEach(function(e,ix){
+      var st=statsLista(e,nd),base={},bm=BM_DEF,pubs=[];
+      st.forEach(function(x){meses[x.month]=1});
       if(h){bm=h.datos.BM||BM_DEF;var v=h.vinculos||{};Object.keys(v).forEach(function(k){if(v[k]===e.id)base=h.datos.D[k]||{}})}
-      var o=Object.assign({},base,(S.diag||{})[e.id]||{}),tiene=o.alcance!=null||o.int!=null;
-      var b=bm[o.sector||SECT_TIPO[e.tipo]||'local']||BM_DEF.local;
-      var np=0,vis=0;
-      if(nd){var vn=nd.vinculos||{};(nd.datos.workspaces||[]).forEach(function(w){if(vn[w.id]===e.id)(w.content||[]).forEach(function(x){if((x.date||'').indexOf(PL.mes)===0){np++;vis+=Number(x.views)||0}})})}
-      (S.plan||[]).forEach(function(x){if(x.empresa===e.id&&(x.fecha||'').indexOf(PL.mes)===0)np++});
-      var ok=tiene?(o.int>=b.int)+(o.pub>=b.pub)+(o.resp<=b.resp)+(o.leads>=b.leads):null;
-      var st=statsLista(e,nd),sm=st.filter(function(x){return x.month===PL.mes})[0],ix=st.indexOf(sm),sp=ix>0?st[ix-1]:null,crec=sm&&sp&&segTot(sp)?(segTot(sm)-segTot(sp))/segTot(sp)*100:null;
-      filas.push({e:e,tiene:tiene,crec:crec,ing:sm?Number(sm.income)||0:null,seg:o.seguidores,alc:o.alcance,int:o.int,pub:o.pub,resp:o.resp,leads:o.leads,np:np,vis:vis,ok:ok});
+      var o=Object.assign({},base,(S.diag||{})[e.id]||{});o.sector=o.sector||SECT_TIPO[e.tipo]||'local';
+      if(nd){var vn=nd.vinculos||{};(nd.datos.workspaces||[]).forEach(function(w){if(vn[w.id]===e.id)(w.content||[]).forEach(function(x){pubs.push({fecha:x.date,estado:estPub({id:x.id,estado:x.status})})})})}
+      (S.plan||[]).forEach(function(x){if(x.empresa===e.id)pubs.push({fecha:x.fecha,estado:estPub(x)})});
+      filas.push({e:e,st:st,o:o,b:bm[o.sector]||BM_DEF.local,tiene:o.alcance!=null||o.int!=null,pubs:pubs,col:COLC[ix%COLC.length]});
     });
-    CPD=filas;pintarCP();
+    var ml=Object.keys(meses).sort();if(!ml.length)ml=[PL.mes];
+    CPD={filas:filas,meses:ml};
+    if(!CP.mes||ml.indexOf(CP.mes)<0)CP.mes=ml[ml.length-1];
+    var sl=$('#cpMes');
+    pintarCP();
   });
 }
-function mejorDe(k,menor){
-  var m=null;CPD.forEach(function(f){if((f.tiene||k==='crec'||k==='ing')&&f[k]!=null&&(!m||(menor?f[k]<m[k]:f[k]>m[k])))m=f});return m;
+function datosMes(f,m){
+  var ms=f.st.map(function(x){return x.month}),i=ms.indexOf(m);
+  if(i<0)return null;
+  var cur=f.st[i],prev=i>0?f.st[i-1]:null,seg=segTot(cur),ps=prev?segTot(prev):0,ing=Number(cur.income)||0,pi=prev?(Number(prev.income)||0):0;
+  return {seg:seg,crec:ps?(seg-ps)/ps*100:null,alc:Number(cur.reach)||0,inter:Number(cur.interactions)||0,tasa:cur.reach?cur.interactions/cur.reach*100:null,ventas:Number(cur.sales)||0,ing:ing,vari:pi?(ing-pi)/pi*100:null,pub:f.pubs.filter(function(x){return (x.fecha||'').indexOf(m)===0&&x.estado==='publicado'}).length,fol:cur.followers||{}};
+}
+function pct1(v){return v==null?'-':(v>=0?'+':'')+v.toFixed(1)+'%'}
+function colPct(v){return v==null?'':'color:'+(v>=0?'var(--ok)':'var(--bad)')}
+function lineaSeg(){
+  var f=CPD.filas,ml=CPD.meses,W=640,H=220,L=48,Rm=12,T=12,B=30,mx=1,hay=false;
+  f.forEach(function(x){x.st.forEach(function(s2){var q0=segTot(s2);if(q0>0)hay=true;mx=Math.max(mx,q0)})});
+  if(!hay)return '<p class="row-s" style="margin:0">Aún no hay seguidores registrados. Anótalos en Estadísticas o carga tus datos en Ajustes.</p>';
+  var X=function(i){return ml.length<2?L+(W-L-Rm)/2:L+i*(W-L-Rm)/(ml.length-1)},Y=function(v){return T+(H-T-B)*(1-v/mx)};
+  var o='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" role="img" aria-label="Crecimiento de seguidores">';
+  for(var g=0;g<=4;g++){var yy=T+(H-T-B)*g/4;o+='<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+yy+'" y2="'+yy+'" stroke="var(--line)"/><text x="'+(L-6)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="var(--mut)">'+Math.round(mx*(1-g/4))+'</text>'}
+  ml.forEach(function(m,i){o+='<text x="'+X(i)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" fill="var(--mut)">'+esc(m.slice(2))+'</text>'});
+  f.forEach(function(x){
+    var pts=[];ml.forEach(function(m,i){var d=x.st.filter(function(s2){return s2.month===m})[0];if(d)pts.push([X(i),Y(segTot(d))])});
+    if(pts.length>1)o+='<polyline fill="none" stroke="'+x.col+'" stroke-width="3" points="'+pts.map(function(q){return q.join(',')}).join(' ')+'"/>';
+    pts.forEach(function(q){o+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="4" fill="'+x.col+'"/>'});
+  });
+  return o+'</svg><div class="chips">'+f.map(function(x){return '<span class="chip"><span style="color:'+x.col+'">●</span> '+esc(x.e.nombre)+'</span>'}).join('')+'</div>';
 }
 function pintarCP(){
   var b=$('#cpBody');if(!b||!CPD)return;
-  if(!CPD.length){b.innerHTML='<div class="empty"><b>Sin empresas</b>Registra empresas para compararlas.</div>';return}
-  var tarj=[['Mayor crecimiento','crec'],['Más ingresos','ing'],['Mejor interacción','int'],['Más seguidores','seg']].map(function(t){
-    var m=mejorDe(t[1]);return '<div class="stat"><span>'+t[0]+'</span><b>'+(m?(t[1]==='crec'?(m.crec>=0?'+':'')+m.crec.toFixed(1)+'%':t[1]==='ing'?'$'+m.ing.toLocaleString('es-CO'):m[t[1]]+(t[1]==='int'?'%':'')):'-')+'</b><span>'+(m?esc(m.e.nombre):'Sin datos')+'</span></div>';
+  var sb=$('#cpSub');if(sb)sb.textContent='Resultados de todas tus empresas en '+nombreMes(CP.mes)+'.';
+  var sl=$('#cpMes');if(sl)sl.innerHTML=CPD.meses.slice().reverse().map(function(m){return '<option value="'+m+'"'+(m===CP.mes?' selected':'')+'>'+esc(nombreMes(m))+'</option>'}).join('');
+  var F=CPD.filas;
+  if(!F.length){b.innerHTML='<div class="empty"><b>Sin empresas</b>Registra empresas para compararlas.</div>';return}
+  var D=F.map(function(f){return {f:f,d:datosMes(f,CP.mes)}});
+  if(CP.tab==='mes'){
+    var mejor=function(k){var m=null;D.forEach(function(x){if(x.d&&x.d[k]!=null&&(!m||x.d[k]>m.d[k]))m=x});return m};
+    var tj=[['Mayor crecimiento','crec',function(v){return pct1(v)},'var(--ok)'],['Más ingresos','ing',function(v){return '$'+v.toLocaleString('es-CO')},'#a78bfa'],['Mejor interacción','tasa',function(v){return v.toFixed(1)+'%'},'#ff6fa5'],['Más seguidores','seg',function(v){return v.toLocaleString('es-CO')},'#22d3ee']].map(function(t){var m=mejor(t[1]);return '<div class="stat" style="border-color:'+t[3]+'"><span>'+t[0]+'</span><b>'+(m?t[2](m.d[t[1]]):'-')+'</b><span>'+(m?esc(m.f.e.nombre):'Sin datos')+'</span></div>'}).join('');
+    var n=function(v,sf){return v==null?'-':v.toLocaleString('es-CO')+(sf||'')};
+    var maxI=Math.max.apply(null,D.map(function(x){return x.d?x.d.ing:0}).concat([1]));
+    b.innerHTML='<section class="kpi">'+tj+'</section><h2>Resumen del mes</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Seguidores</th><th>Crecimiento</th><th>Alcance</th><th>Interacciones</th><th>Tasa de interacción</th><th>Ventas</th><th>Ingresos</th><th>Var. ingresos</th><th>Publicados</th></tr>'+
+     D.map(function(x){var d=x.d;return '<tr><td>'+esc(x.f.e.nombre)+'</td>'+(d?'<td>'+n(d.seg)+'</td><td style="'+colPct(d.crec)+'">'+pct1(d.crec)+'</td><td>'+n(d.alc)+'</td><td>'+n(d.inter)+'</td><td>'+(d.tasa==null?'-':d.tasa.toFixed(1)+'%')+'</td><td>'+n(d.ventas)+'</td><td>$'+n(d.ing)+'</td><td style="'+colPct(d.vari)+'">'+pct1(d.vari)+'</td><td>'+d.pub+'</td>':'<td colspan="9" class="row-s" style="text-align:left">Sin estadísticas de este mes. Regístralas en Estadísticas.</td>')+'</tr>'}).join('')+'</table></div>'+
+     '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))"><div><h2>Crecimiento acumulado de seguidores</h2><div class="panel" style="padding:12px 16px">'+lineaSeg()+'</div></div><div><h2>Ingresos del mes</h2><div class="panel">'+D.map(function(x){var v=x.d?x.d.ing:0;return '<div class="row"><div style="width:130px" class="row-t">'+esc(x.f.e.nombre)+'</div><div class="row-main"><div class="bar" style="max-width:none;height:10px"><i style="width:'+Math.round(v/maxI*100)+'%;background:'+x.f.col+'"></i></div></div><span class="row-s" style="width:80px;text-align:right">$'+v.toLocaleString('es-CO')+'</span></div>'}).join('')+'</div></div></div>';
+  }else if(CP.tab==='lect'){cpLectura(b,D)}else if(CP.tab==='grp'){cpGrupos(b,D)}else if(CP.tab==='evo'){cpEvolucion(b)}else if(CP.tab==='sector'){
+    b.innerHTML='<p class="sub" style="margin:0 0 10px">Cada indicador de la empresa frente al promedio de su sector.</p><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Sector</th><th>Interacción</th><th>Publicaciones/sem</th><th>Resp. WhatsApp (min)</th><th>Contactos/mes</th><th>Sobre el sector</th></tr>'+
+     D.map(function(x){var f=x.f,o=f.o,bb=f.b;if(!f.tiene)return '<tr><td>'+esc(f.e.nombre)+'</td><td colspan="6" class="row-s" style="text-align:left">Sin datos de diagnóstico. Ingrésalos en Diagnóstico y estrategia.</td></tr>';
+      var ok=(o.int>=bb.int)+(o.pub>=bb.pub)+(o.resp<=bb.resp)+(o.leads>=bb.leads);
+      return '<tr><td>'+esc(f.e.nombre)+'</td><td>'+esc(f.o.sector)+'</td><td>'+o.int+'% '+tendencia(o.int,bb.int)+'</td><td>'+o.pub+' '+tendencia(o.pub,bb.pub)+'</td><td>'+o.resp+' '+tendencia(o.resp,bb.resp,true)+'</td><td>'+o.leads+' '+tendencia(o.leads,bb.leads)+'</td><td><b>'+ok+' de 4</b></td></tr>'}).join('')+'</table></div>';
+  }else{
+    var PL2=['Instagram','TikTok','Facebook','YouTube'];
+    b.innerHTML='<div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th>'+PL2.map(function(p2){return '<th>'+p2+'</th>'}).join('')+'<th>Total</th><th>Red principal</th></tr>'+
+     D.map(function(x){var d=x.d;if(!d)return '<tr><td>'+esc(x.f.e.nombre)+'</td><td colspan="6" class="row-s" style="text-align:left">Sin estadísticas de este mes.</td></tr>';
+      var top=PL2.slice().sort(function(a1,b1){return (Number(d.fol[b1])||0)-(Number(d.fol[a1])||0)})[0];
+      return '<tr><td>'+esc(x.f.e.nombre)+'</td>'+PL2.map(function(p2){var v=Number(d.fol[p2])||0;return '<td>'+v.toLocaleString('es-CO')+(d.seg?' <span class="row-s">('+Math.round(v/d.seg*100)+'%)</span>':'')+'</td>'}).join('')+'<td><b>'+d.seg.toLocaleString('es-CO')+'</b></td><td>'+((Number(d.fol[top])||0)?top:'-')+'</td></tr>'}).join('')+'</table></div>';
+  }
+  b.insertAdjacentHTML('afterbegin',cpAviso(D));
+}
+var CP_MET={seg:['Seguidores',function(x){return segTot(x)},0],alc:['Alcance',function(x){return Number(x.reach)||0},0],inter:['Interacciones',function(x){return Number(x.interactions)||0},0],ing:['Ingresos',function(x){return Number(x.income)||0},1],ven:['Ventas',function(x){return Number(x.sales)||0},0]};
+function cpAviso(D){
+  var con=D.filter(function(x){return x.d}).length,n=D.length;
+  if(con===n)return '';
+  return '<div class="hint" style="margin:0 0 12px"><b style="color:var(--tx)">'+con+' de '+n+' empresas tienen cifras en '+esc(nombreMes(CP.mes))+'.</b> '+(con?'Faltan: '+D.filter(function(x){return !x.d}).map(function(x){return esc(x.f.e.nombre)}).join(', ')+'. ':'')+'Regístralas en <a href="#estadisticas" style="color:var(--acc-t)">Estadísticas</a>'+(con?'':'. Si estás en otro equipo, primero carga tu respaldo o la carpeta de la nube en <a href="#ajustes" style="color:var(--acc-t)">Ajustes</a>')+'.</div>';
+}
+function cpLectura(b,D){
+  var C=D.filter(function(x){return x.d});
+  if(!C.length){b.innerHTML='<div class="empty"><b>Sin cifras para comparar</b>Cuando registres las estadísticas del mes, aquí verás quién lidera y a quién atender primero.</div>';return}
+  var top=function(k,low){var m=null;C.forEach(function(x){var v=x.d[k];if(v==null)return;if(!m||(low?v<m.d[k]:v>m.d[k]))m=x});return m},ins=[],m,nm=function(x){return '<b>'+esc(x.f.e.nombre)+'</b>'};
+  m=top('crec');if(m&&m.d.crec>0)ins.push(['ok',nm(m)+' es la que más crece en seguidores ('+pct1(m.d.crec)+').']);
+  m=top('ing');if(m&&m.d.ing>0)ins.push(['ok',nm(m)+' lidera en ingresos del mes ($'+m.d.ing.toLocaleString('es-CO')+').']);
+  m=top('tasa');if(m&&m.d.tasa>0)ins.push(['ok',nm(m)+' tiene la mejor interacción ('+m.d.tasa.toFixed(1)+'%).']);
+  C.forEach(function(x){
+    if(x.d.crec!=null&&x.d.crec<0)ins.push(['mal',nm(x)+' perdió seguidores este mes ('+pct1(x.d.crec)+'). Conviene revisar qué dejó de publicar.']);
+    if(x.d.vari!=null&&x.d.vari<0)ins.push(['mal',nm(x)+' tuvo menos ingresos que el mes anterior ('+pct1(x.d.vari)+').']);
+  });
+  D.forEach(function(x){var f=x.f;if(!f.tiene)return;var o=f.o,bb=f.b;
+    if(o.resp>bb.resp)ins.push(['mal',nm(x)+' responde por WhatsApp en '+o.resp+' min y el sector en '+bb.resp+'. Es la mejora más rápida.']);
+    if(o.pub<bb.pub)ins.push(['mal',nm(x)+' publica '+o.pub+' veces por semana y el sector '+bb.pub+'.']);
+  });
+  var sin=D.filter(function(x){return !x.d});if(sin.length)ins.push(['',sin.map(function(x){return esc(x.f.e.nombre)}).join(', ')+': sin cifras de este mes.']);
+  var pts={};C.forEach(function(x){pts[x.f.e.id]={s:0,n:0}});
+  ['seg','crec','tasa','ing'].forEach(function(k){C.filter(function(x){return x.d[k]!=null}).sort(function(a1,b1){return b1.d[k]-a1.d[k]}).forEach(function(x,i){pts[x.f.e.id].s+=i+1;pts[x.f.e.id].n++})});
+  var R=C.map(function(x){var q=pts[x.f.e.id];return {x:x,sc:q.n?q.s/q.n:99}}).sort(function(a1,b1){return a1.sc-b1.sc}),n0=function(v,sf){return v==null?'-':v.toLocaleString('es-CO')+(sf||'')};
+  b.innerHTML='<h2>Lectura rápida de '+esc(nombreMes(CP.mes))+'</h2>'+(ins.length?ins.map(function(i){return '<div class="insight '+i[0]+'">'+i[1]+'</div>'}).join(''):'<p class="row-s">Aún no hay suficientes datos para sacar conclusiones.</p>')+
+   '<h2>Ranking</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Seguidores</th><th>Crecimiento</th><th>Interacción</th><th>Ingresos</th><th>Puesto promedio</th></tr>'+
+   R.map(function(r,i){var d=r.x.d;return '<tr><td><b>'+(i+1)+'.</b> '+esc(r.x.f.e.nombre)+'</td><td>'+n0(d.seg)+'</td><td style="'+colPct(d.crec)+'">'+pct1(d.crec)+'</td><td>'+(d.tasa==null?'-':d.tasa.toFixed(1)+'%')+'</td><td>$'+n0(d.ing)+'</td><td>'+(r.sc>=99?'-':r.sc.toFixed(1))+'</td></tr>'}).join('')+'</table></div><p class="row-s">El puesto promedio combina seguidores, crecimiento, interacción e ingresos (1 es el mejor).</p>';
+}
+function cpGrupos(b,D){
+  var tabla=function(tit,keyf,namef){
+    var G={};D.forEach(function(x){var k=keyf(x.f.e);(G[k]=G[k]||[]).push(x)});
+    var rows=Object.keys(G).map(function(k){
+      var g=G[k],c=g.filter(function(x){return x.d}),sum=function(f){return c.reduce(function(t,x){return t+(x.d[f]||0)},0)},
+        cr=c.filter(function(x){return x.d.crec!=null}),ta=c.filter(function(x){return x.d.tasa!=null}),av=function(l,f){return l.reduce(function(t,x){return t+x.d[f]},0)/l.length};
+      return '<tr><td><b>'+esc(namef(k))+'</b></td><td>'+g.map(function(x){return esc(x.f.e.nombre)}).join(', ')+'</td><td>'+(c.length?sum('seg').toLocaleString('es-CO'):'-')+'</td><td style="'+(cr.length?colPct(av(cr,'crec')):'')+'">'+(cr.length?pct1(av(cr,'crec')):'-')+'</td><td>'+(ta.length?av(ta,'tasa').toFixed(1)+'%':'-')+'</td><td>'+(c.length?'$'+sum('ing').toLocaleString('es-CO'):'-')+'</td></tr>';
+    }).join('');
+    return '<h2>'+tit+'</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Grupo</th><th>Empresas</th><th>Seguidores</th><th>Crecimiento prom.</th><th>Interacción prom.</th><th>Ingresos</th></tr>'+rows+'</table></div>';
+  };
+  b.innerHTML=tabla('Por tipo de servicio',function(e){return nichoDe(e)},function(k){return NICHOS[k]})+tabla('Por región',function(e){return regionDe(e)},function(k){return REG[k].n})+'<p class="row-s">Salen de la ficha de cada empresa (tipo de servicio, región o ciudad). Son los mismos que usan los guiones, así comparas cosas parecidas entre sí.</p>';
+}
+function cpEvoRows(){
+  var M=CP_MET[CP.met]||CP_MET.seg,ml=CPD.meses.slice(-12);
+  return [['Empresa'].concat(ml.map(nombreMes))].concat(CPD.filas.map(function(f){return [f.e.nombre].concat(ml.map(function(m){var d=f.st.filter(function(x){return x.month===m})[0];return d?M[1](d):''}))}));
+}
+function cpEvolucion(b){
+  var M=CP_MET[CP.met]||CP_MET.seg,ml=CPD.meses.slice(-12);
+  var tb=CPD.filas.map(function(f){
+    var prev=null;
+    return '<tr><td>'+esc(f.e.nombre)+'</td>'+ml.map(function(m){
+      var d=f.st.filter(function(x){return x.month===m})[0];if(!d){return '<td class="row-s">-</td>'}
+      var v=M[1](d),pc=prev?(v-prev)/prev*100:null;prev=v||prev;
+      return '<td>'+(M[2]?'$':'')+v.toLocaleString('es-CO')+(pc!=null?'<br><span class="row-s" style="'+colPct(pc)+'">'+pct1(pc)+'</span>':'')+'</td>';
+    }).join('')+'</tr>';
   }).join('');
-  var mx=Math.max.apply(null,CPD.map(function(f){return f.alc||0}).concat([1]));
-  var n=function(v,s2){return v==null?'-':v+(s2||'')};
-  b.innerHTML='<section class="kpi">'+tarj+'</section><h2>Resumen del mes</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Seguidores</th><th>Alcance</th><th>Interacción</th><th>Pub./sem</th><th>Resp. WA (min)</th><th>Contactos</th><th>Publicaciones del mes</th><th>Sobre sector</th></tr>'+
-   CPD.map(function(f){return '<tr><td>'+esc(f.e.nombre)+'</td><td>'+n(f.seg)+'</td><td>'+n(f.alc)+'</td><td>'+n(f.int,'%')+'</td><td>'+n(f.pub)+'</td><td>'+n(f.resp)+'</td><td>'+n(f.leads)+'</td><td>'+f.np+'</td><td>'+(f.ok==null?'-':f.ok+' de 4')+'</td></tr>'}).join('')+'</table></div>'+
-   '<h2>Alcance por empresa</h2><div class="panel">'+CPD.map(function(f){var w=Math.round((f.alc||0)/mx*100);return '<div class="row"><div style="width:170px;flex:none" class="row-t">'+esc(f.e.nombre)+'</div><div class="row-main"><div class="bar" style="max-width:none;height:10px"><i style="width:'+w+'%;background:var(--acc)"></i></div></div><span class="row-s" style="width:60px;text-align:right">'+n(f.alc)+'</span></div>'}).join('')+'</div>';
+  b.innerHTML='<div class="tabs" style="flex-wrap:wrap">'+Object.keys(CP_MET).map(function(k){return '<button data-act="cpmet" data-id="'+k+'" class="'+(CP.met===k?'on':'')+'">'+CP_MET[k][0]+'</button>'}).join('')+'</div><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th>'+ml.map(function(m){return '<th>'+esc(nombreMes(m))+'</th>'}).join('')+'</tr>'+tb+'</table></div><p class="row-s">Últimos '+ml.length+' meses con datos. El porcentaje es el cambio frente al mes anterior.</p>';
 }
 function csvComp(){
   if(!CPD)return;
-  var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'};
-  var rows=[['Empresa','Seguidores','Alcance','Interacción %','Publicaciones por semana','Respuesta WhatsApp (min)','Contactos al mes','Publicaciones del mes','Indicadores sobre el sector']].concat(CPD.map(function(f){return [f.e.nombre,f.seg,f.alc,f.int,f.pub,f.resp,f.leads,f.np,f.ok]}));
-  var blob=new Blob(['\ufeff'+rows.map(function(r){return r.map(q).join(',')}).join('\r\n')],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='comparativo-'+PL.mes+'.csv';document.body.appendChild(a);a.click();a.remove();
-  setTimeout(function(){URL.revokeObjectURL(url)},1500);toast('CSV descargado');
+  var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'},rows,D=CPD.filas.map(function(f){return {f:f,d:datosMes(f,CP.mes)}});
+  if(CP.tab==='evo')rows=cpEvoRows();else if(CP.tab==='sector')rows=[['Empresa','Sector','Interacción %','Publicaciones por semana','Respuesta WhatsApp (min)','Contactos al mes','Indicadores sobre el sector']].concat(D.map(function(x){var o=x.f.o,bb=x.f.b;return [x.f.e.nombre,o.sector,o.int,o.pub,o.resp,o.leads,x.f.tiene?(o.int>=bb.int)+(o.pub>=bb.pub)+(o.resp<=bb.resp)+(o.leads>=bb.leads):'']}));
+  else if(CP.tab==='plat')rows=[['Empresa','Instagram','TikTok','Facebook','YouTube','Total']].concat(D.map(function(x){var d=x.d||{fol:{}};return [x.f.e.nombre,d.fol.Instagram,d.fol.TikTok,d.fol.Facebook,d.fol.YouTube,d.seg]}));
+  else rows=[['Empresa','Seguidores','Crecimiento %','Alcance','Interacciones','Tasa de interacción %','Ventas','Ingresos','Var. ingresos %','Publicados']].concat(D.map(function(x){var d=x.d||{};return [x.f.e.nombre,d.seg,d.crec!=null?d.crec.toFixed(1):'',d.alc,d.inter,d.tasa!=null?d.tasa.toFixed(1):'',d.ventas,d.ing,d.vari!=null?d.vari.toFixed(1):'',d.pub]}));
+  bajar(new Blob(['\ufeff'+rows.map(function(r){return r.map(q).join(',')}).join('\r\n')],{type:'text/csv;charset=utf-8'}),'comparativo-'+CP.tab+'-'+CP.mes+'.csv');toast('CSV descargado');
 }
+document.addEventListener('change',function(ev){if(ev.target.id==='cpMes'){CP.mes=ev.target.value;pintarCP()}});
 /* Módulo Estudio de diseño */
 var DS={i:0},DSL={src:'',img:null},DST=null;
 var FMTS={sq:[1080,1080,'Post cuadrado 1080x1080'],vt:[1080,1350,'Post vertical 1080x1350'],hi:[1080,1920,'Historia 1080x1920']};
@@ -1142,7 +1264,7 @@ function promptIA(a){
   var t=IAT.filter(function(x){return x[0]===IAM.tipo})[0];
   return 'Eres experto en marketing digital para negocios locales de Colombia. Escribe en español colombiano con tono '+(a.tono||'cercano').toLowerCase()+'.\n\nNEGOCIO: '+a.nombre+(a.tipo?' ('+a.tipo+')':'')+(a.ciudad?', en '+a.ciudad:'')+
    '\nProductos o servicios: '+(IAM.prod||a.productos||'no indicados')+'\nLo que lo hace diferente: '+(a.diferenciales||'no indicado')+'\nPúblico: '+(a.publico||'general')+'\nObjetivo: '+(a.objetivo||'Vender más')+(a.whatsapp?'\nWhatsApp: '+a.whatsapp:'')+
-   fichaExtra(a)+'\nRed social: '+IAM.red+'\n\nTAREA: '+t[2].replace('{dur}',IAM.dur)+(IAM.det?'\nDetalle a destacar: '+IAM.det:'')+'\n\nEntrega solo el resultado, listo para usar, sin explicaciones.';
+   fichaExtra(a)+regionBloque(a)+'\nRed social: '+IAM.red+'\n\nTAREA: '+t[2].replace('{dur}',IAM.dur)+(IAM.det?'\nDetalle a destacar: '+IAM.det:'')+'\n\nEntrega solo el resultado, listo para usar, sin explicaciones.';
 }
 function vIA(){
   var a=activa();
@@ -1323,21 +1445,49 @@ document.addEventListener('change',function(ev){
 });
 
 /* Nuevo proyecto */
-var NP={tipo:'Reel / TikTok / Short',dur:'30',clip:'8',fmt:'9:16 vertical',idioma:'español',audio:'Voz en off aparte (solo ambiente en los clips)',atm:'Auto (según el nicho)',tema:'',res:null,err:'',busy:false};
-var NP_OPT={tipo:['Reel / TikTok / Short','Video largo (YouTube)','Cuña comercial / radio','Jingle'],dur:['15','30','60','180'],clip:['4','6','8'],fmt:['9:16 vertical','16:9 horizontal','1:1 cuadrado'],audio:['Voz en off aparte (solo ambiente en los clips)','Personajes que hablan dentro del clip'],atm:['Auto (según el nicho)','Cálida y acogedora','Moderna y limpia','Divertida y colorida','Elegante y premium']};
+var NP={tipo:'Reel / TikTok / Short',dur:'30',clip:'8',reg:'',nicho:'',fmt:'9:16 vertical',idioma:'español',audio:'Voz en off aparte (solo ambiente en los clips)',atm:'Auto (según el nicho)',tema:'',res:null,err:'',busy:false};
+var NP_OPT={tipo:['Reel / TikTok / Short','Video largo (YouTube)','Cuña comercial / radio','Jingle'],dur:['15','30','45','60','90','180'],clip:['4','6','8','10'],fmt:['9:16 vertical','16:9 horizontal','1:1 cuadrado'],audio:['Voz en off aparte (solo ambiente en los clips)','Personajes que hablan dentro del clip'],atm:['Auto (según el nicho)','Cálida y acogedora','Moderna y limpia','Divertida y colorida','Elegante y premium']};
+var VG_ACT='',VG_RES=null,VIRAL=['3 errores que cometes al elegir {p}','Lo que nadie te cuenta de {p}','El secreto de {p} en {c}','Antes y después con {p}','Así se prepara {p}, paso a paso','Pídelo así y nunca fallas con {p}'];
+function palabras(t){t=String(t||'').trim();return t?t.split(/\s+/).length:0}
+function textoLocucion(r){return (r.escenas||[]).map(function(e){return e.locucion}).filter(Boolean).join(' ')}
+function resaltar(t,a){
+  var h=esc(t),terms=listaTxt(a.productos).concat([a.nombre]).filter(function(x){return x&&x.length>2});
+  terms.forEach(function(x){var re=new RegExp('('+esc(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');h=h.replace(re,'<mark class="hl">$1</mark>')});
+  return h;
+}
+function planProd(){
+  var dur=Number(NP.dur),clip=Number(NP.clip),n=Math.max(1,Math.ceil(dur/clip)),last=dur-(n-1)*clip;
+  var det=(n===1||last===clip)?n+' clips de '+clip+' s':(n-1)+' clips de '+clip+' s + 1 clip de '+last+' s';
+  return {n:n,last:last,txt:n+' clips en total: '+det+' = '+dur+' s. Texto total: unas '+Math.round(dur*2.3)+' palabras (~'+dur+' s de locución).'};
+}
+function nichoOpts(sel){return '<option value="">Automático (según la ficha)</option>'+Object.keys(NICHOS).map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+NICHOS[k]+'</option>'}).join('')}
+function regOpts(sel){return '<option value="">Automática (según la ficha)</option>'+Object.keys(REG).map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+REG[k].n+'</option>'}).join('')}
+function vistaGuion(r,a){
+  var V=r.voz||{},loc=textoLocucion(r),w=palabras(loc),sec=Math.round(w/2.3),reg=REG[regionDe(a,NP.reg)],cat=r.categoria||(NICHOS[nichoDe(a,NP.nicho)]+' · '+reg.n);
+  VG_ACT=loc;VG_RES=r;
+  return '<div class="panel" style="padding:14px 16px"><div class="chips"><span class="badge">'+esc(cat)+'</span><span class="badge mut">'+esc(V.arquetipo||('Voz · '+reg.n))+'</span></div>'+
+   '<h2 style="margin:10px 0 4px">'+esc(r.titulo||'Proyecto')+'</h2><p class="row-s" style="margin:0 0 10px">'+esc(r.gancho||'')+'</p>'+
+   '<div class="acts">'+cp(loc,'Copiar texto')+'<button class="btn sm pri" data-act="vzusar">Editar en estudio de voz</button><button class="btn sm" data-act="vpromptsveo">Copiar prompts de Veo</button><button class="btn sm" data-act="flow">Abrir Google Flow</button></div>'+
+   '<div class="row-t" style="margin-top:14px">Texto del guion para locución <span class="row-s">· '+w+' palabras · ~'+sec+' s</span></div><div class="pre" style="line-height:1.8">'+resaltar(loc,a)+(r.cta?' <mark class="hl hl2">'+esc(r.cta)+'</mark>':'')+'</div>'+
+   ((r.conceptos||[]).filter(Boolean).length?'<div class="chips">'+r.conceptos.filter(Boolean).map(function(c){return '<span class="chip">'+esc(c)+'</span>'}).join('')+'</div>':'')+
+   ((V.tono||V.arco_emocional||V.directiva_tts)?'<div class="row-t" style="margin-top:14px">Identidad vocal y arquetipo de locución</div><div class="grid" style="grid-template-columns:1fr 1fr"><div class="pre" style="margin:0"><b>Tono y modulación</b><br>'+esc(V.tono||'')+'</div><div class="pre" style="margin:0"><b>Arco emocional</b><br>'+esc(V.arco_emocional||'')+'</div></div>'+(V.directiva_tts?'<div class="pre">'+esc(V.directiva_tts)+'</div><p>'+cp(V.directiva_tts,'Copiar directiva TTS')+'</p>':''):'')+'</div>';
+}
 function pintarNP(b){
-  var a=activa(),sel=function(k){return '<div class="f"><label>'+({tipo:'Tipo de pieza',dur:'Duración (segundos)',clip:'Clip de Veo (segundos)',fmt:'Formato',audio:'Audio dentro de los clips',atm:'Atmósfera y dirección'})[k]+'</label><select data-np="'+k+'">'+NP_OPT[k].map(function(o){return '<option'+(o===NP[k]?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select></div>'},r=NP.res;
-  b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+['tipo','dur','clip','fmt','audio','atm'].map(sel).join('')+'<div class="f"><label>Idioma</label><input type="text" data-np="idioma" value="'+esc(NP.idioma)+'"></div></div>'+
-   '<div class="f"><label>Tema o idea (opcional)</label><input type="text" data-np="tema" placeholder="Ej: el desayuno de domingo en familia" value="'+esc(NP.tema)+'"></div><div class="acts" style="margin-top:10px"><button class="btn pri" data-act="npgen"'+(NP.busy?' disabled':'')+'>'+(NP.busy?'Generando...':'Generar con Gemini')+'</button><button class="btn" data-act="npprompt">Copiar prompt</button><button class="btn" data-act="npborr">Borrador sin IA</button></div></div>'+
+  var a=activa(),sel=function(k){return '<div class="f"><label>'+({tipo:'Tipo de pieza',dur:'Duración (segundos)',clip:'Clip de Veo (segundos)',fmt:'Formato',audio:'Audio dentro de los clips',atm:'Atmósfera y dirección'})[k]+'</label><select data-np="'+k+'">'+NP_OPT[k].map(function(o){return '<option'+(o===NP[k]?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select></div>'},r=NP.res,pl=planProd(),num=((S.proyectos||{})[a.id]||[]).length+1;
+  b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="acts" style="margin-bottom:10px;align-items:center"><span class="badge">VIDEO #'+num+'</span><button class="btn sm" data-act="nppreset">Preset viral</button></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+['tipo','dur','clip','fmt','audio','atm'].map(sel).join('')+
+   '<div class="f"><label>Región y acento</label><select data-np="reg">'+regOpts(NP.reg)+'</select></div><div class="f"><label>Universo visual y tipo de servicio</label><select data-np="nicho">'+nichoOpts(NP.nicho)+'</select></div><div class="f"><label>Idioma</label><input type="text" data-np="idioma" value="'+esc(NP.idioma)+'"></div></div>'+
+   '<div class="f"><label>Enfoque específico (opcional)</label><input type="text" data-np="tema" placeholder="Ej: el desayuno de domingo en familia" value="'+esc(NP.tema)+'"></div>'+
+   '<div class="hint" style="margin:10px 0"><b style="color:var(--tx)">Plan de producción:</b> '+esc(pl.txt)+'</div>'+
+   '<div class="acts"><button class="btn pri" data-act="npgen"'+(NP.busy?' disabled':'')+'>'+(NP.busy?'Generando...':'Generar guion con Gemini')+'</button><button class="btn" data-act="npprompt">Copiar prompt</button><button class="btn" data-act="npborr">Borrador sin IA</button></div></div>'+
    (NP.err?'<p class="hint" style="color:var(--bad)">'+esc(NP.err)+'</p>':'')+
-   (r?'<h2>'+esc(r.titulo||'Proyecto')+'</h2><div class="panel" style="padding:12px 16px"><div class="row-s">Gancho: '+esc(r.gancho||'')+'</div><div class="row-s" style="margin-top:6px">'+(r.escenas||[]).length+' escenas · '+esc(a.nombre)+'</div></div><div class="acts"><button class="btn pri" data-act="npguardar">Guardar proyecto</button></div>':'<p class="hint">Gemini escribe el guion por escenas con los prompts para Veo 3, la dirección de voz y el kit para redes. Sin clave, usa "Copiar prompt" o el borrador.</p>');
+   (r?vistaGuion(r,a)+'<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="npguardar">Guardar proyecto</button></div>':'<p class="hint">Gemini escribe el guion por escenas con los prompts para Veo 3, la identidad vocal y el kit para redes, adaptado a la región y al tipo de servicio. Sin clave, usa "Copiar prompt" o el borrador.</p>');
 }
 document.addEventListener('change',function(ev){var k=ev.target.getAttribute&&ev.target.getAttribute('data-np');if(k)NP[k]=ev.target.value});
 document.addEventListener('input',function(ev){var k=ev.target.getAttribute&&ev.target.getAttribute('data-np');if(k)NP[k]=ev.target.value});
 function promptNP(a){
-  var ns=Math.max(1,Math.round(Number(NP.dur)/Number(NP.clip)));
-  return 'Eres director creativo de video para negocios locales de Colombia. Crea un guion para una pieza de tipo "'+NP.tipo+'" de '+NP.dur+' segundos, formato '+NP.fmt+', idioma '+NP.idioma+'. Atmósfera: '+NP.atm+'. Audio: '+NP.audio+'.\n\nNEGOCIO: '+a.nombre+' ('+a.tipo+(a.ciudad?', '+a.ciudad:'')+'). Productos: '+(a.productos||'no indicados')+'. Diferenciales: '+(a.diferenciales||'no indicados')+'. Público: '+(a.publico||'general')+'. Tono: '+(a.tono||'Cercano')+'. Objetivo: '+(a.objetivo||'Vender más')+(a.whatsapp?'. WhatsApp: '+a.whatsapp:'')+'.'+fichaExtra(a)+(NP.tema?'\nTEMA: '+NP.tema:'')+
-   '\n\nDivide en '+ns+' escenas de '+NP.clip+' segundos cada una. Los prompt_veo van en inglés, describen cámara, luz, acción y ambiente, y mantienen el mismo personaje y lugar descritos en ancla_visual.\nResponde SOLO con JSON válido, sin texto extra ni comillas de código, con esta forma:\n{"titulo":"","gancho":"","ancla_visual":"","escenas":[{"n":1,"duracion":'+NP.clip+',"locucion":"","texto_pantalla":"","visual":"","prompt_veo":""}],"cta":"","kit":{"titulo":"","descripcion":"","hashtags":["#"],"comentario_fijado":""}}';
+  var pp=planProd(),ns=pp.n;
+  return 'Eres director creativo de video para negocios locales de Colombia. Crea un guion para una pieza de tipo "'+NP.tipo+'" de '+NP.dur+' segundos, formato '+NP.fmt+', idioma '+NP.idioma+'. Atmósfera: '+NP.atm+'. Audio: '+NP.audio+'.\n\nNEGOCIO: '+a.nombre+' ('+a.tipo+(a.ciudad?', '+a.ciudad:'')+'). Productos: '+(a.productos||'no indicados')+'. Diferenciales: '+(a.diferenciales||'no indicados')+'. Público: '+(a.publico||'general')+'. Tono: '+(a.tono||'Cercano')+'. Objetivo: '+(a.objetivo||'Vender más')+(a.whatsapp?'. WhatsApp: '+a.whatsapp:'')+'.'+fichaExtra(a)+regionBloque(a,NP.reg,NP.nicho)+(NP.tema?'\nTEMA: '+NP.tema:'')+
+   '\n\nPLAN DE PRODUCCIÓN: '+pp.txt+' Divide el guion en '+ns+' escenas con esas duraciones; la locución de cada escena debe tener unas '+Math.round(Number(NP.clip)*2.3)+' palabras (la última, unas '+Math.round(pp.last*2.3)+'). Los prompt_veo van en inglés, describen cámara, luz, acción y ambiente, y mantienen el mismo personaje y lugar descritos en ancla_visual.\nEn voz.directiva_tts escribe en inglés una instrucción de lectura para un motor de voz (timbre, ritmo, emoción y acento regional). En categoria escribe el nicho y la región.\nResponde SOLO con JSON válido, sin texto extra ni comillas de código, con esta forma:\n{"titulo":"","categoria":"","gancho":"","ancla_visual":"","voz":{"arquetipo":"","tono":"","arco_emocional":"","directiva_tts":""},"conceptos":[""],"escenas":[{"n":1,"duracion":'+NP.clip+',"locucion":"","texto_pantalla":"","visual":"","prompt_veo":""}],"cta":"","kit":{"titulo":"","descripcion":"","hashtags":["#"],"comentario_fijado":""}}';
 }
 function leerJSONtexto(t){
   t=String(t||'').replace(/```json|```/g,'');var i=t.indexOf('{'),j=t.lastIndexOf('}');
@@ -1354,7 +1504,7 @@ function borradorNP(a){
     var tx=i===1?'¿Conoces '+a.nombre+'?':i===ns?'Escríbenos'+(a.whatsapp?' al '+a.whatsapp:' hoy')+'.':(pr[i-2]||df[i-2]||'Lo que nos hace diferentes');
     es.push({n:i,duracion:Number(NP.clip),locucion:tx,texto_pantalla:tx,visual:'Plano del negocio y del producto',prompt_veo:NP.fmt.split(' ')[0]+' video, '+NP.atm+', '+(a.tipo||'local business')+' in '+(a.ciudad||'Colombia')+', showing '+(pr[i-2]||'the product')+', natural light, smooth camera movement.'});
   }
-  return {titulo:(NP.tema||'Video de '+a.nombre),gancho:es[0].locucion,ancla_visual:a.nombre+', '+(a.tipo||'')+', '+(a.ciudad||''),escenas:es,cta:'Escríbenos'+(a.whatsapp?' al '+a.whatsapp:''),kit:{titulo:NP.tema||a.nombre,descripcion:'',hashtags:[],comentario_fijado:''}};
+  return {titulo:(NP.tema||'Video de '+a.nombre),gancho:es[0].locucion,ancla_visual:a.nombre+', '+(a.tipo||'')+', '+(a.ciudad||''),escenas:es,categoria:NICHOS[nichoDe(a,NP.nicho)]+' · '+REG[regionDe(a,NP.reg)].n,voz:{arquetipo:'Voz cercana · '+REG[regionDe(a,NP.reg)].n,tono:'Cálido, claro y confiable',arco_emocional:'Gancho, beneficio y llamado a la acción',directiva_tts:'Speak in Spanish with a '+REG[regionDe(a,NP.reg)].acento+' accent, warm and clear, medium pace.'},cta:'Escríbenos'+(a.whatsapp?' al '+a.whatsapp:''),kit:{titulo:NP.tema||a.nombre,descripcion:'',hashtags:[],comentario_fijado:''}};
 }
 
 /* Voz */
@@ -1362,6 +1512,7 @@ var ACENTOS={'Colombiano paisa (Antioquia)':'Colombian Paisa (Antioquia)','Colom
 var VZ={proy:'',voz:'Aoede',acento:'Colombiano paisa (Antioquia)',estilo:'Warm, friendly, smiling delivery with inviting and enthusiastic tone',texto:'',busy:false,err:''};
 var VOCES=['Aoede','Kore','Charon','Puck','Fenrir','Leda','Orus','Zephyr','Achird','Sulafat'];
 function pintarVoz(b){
+  var a0=activa();if(VZ.emp!==a0.id){VZ.emp=a0.id;VZ.acento=REG[regionDe(a0)].n}
   var a=activa(),ps=GVD.proj.filter(function(p){return p.resultado&&p.resultado.escenas}),mi=(S.voces||{})[a.id]||[];
   b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="f"><label>Proyecto</label><select data-vz="proy"><option value="">Texto libre</option>'+ps.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===VZ.proy?' selected':'')+'>'+esc(p.titulo)+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label>Texto a locutar</label><textarea data-vz="texto" style="min-height:130px">'+esc(VZ.texto)+'</textarea><small>'+(VZ.texto.trim()?VZ.texto.trim().split(/\s+/).length:0)+' palabras · ~'+Math.round((VZ.texto.trim()?VZ.texto.trim().split(/\s+/).length:0)/2.5)+' s</small></div>'+
@@ -1416,7 +1567,7 @@ function generarVoz(){
   }).catch(function(e){VZ.err=e.message}).then(function(){VZ.busy=false;if(route()==='guiones')pintarGV()});
 }
 /* Ensamblar videos de muestra */
-var EN={proy:'',voz:'',clips:[],music:null,mus:'',dimAuto:null,vv:100,mv:18,subs:true,fmt:'Auto',busy:false},ENR=null;
+var EN={proy:'',voz:'',clips:[],music:null,mus:'',dimAuto:null,vv:100,mv:18,subs:true,subEstilo:'auto',subColor:'#f5c242',subPos:'inf',subCaja:'cristal',subTexto:'',vozFile:null,vozNom:'',carpeta:'',fmt:'Auto',busy:false},ENR=null;
 var FMT_EN={'9:16':[540,960],'16:9':[960,540],'1:1':[720,720],'4:5':[576,720]};
 var MUSICAS=[['','Sin música'],['calida','Cálida y acogedora'],['alegre','Alegre y comercial'],['relajada','Relajada (lo-fi)'],['elegante','Elegante'],['energica','Enérgica']];
 function dimsEn(){return EN.fmt==='Auto'&&EN.dimAuto?EN.dimAuto:(FMT_EN[EN.fmt]||[540,960])}
@@ -1530,11 +1681,12 @@ function pintarEns(b){
   b.innerHTML='<div class="panel" style="padding:14px 16px"><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))"><div class="f"><label>Proyecto (para los subtítulos)</label><select data-en="proy"><option value="">Sin subtítulos</option>'+ps.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===EN.proy?' selected':'')+'>'+esc(p.titulo)+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label>Voz</label><select data-en="voz"><option value="">Sin voz</option>'+vs.map(function(v){return '<option value="'+esc(v.k)+'"'+(v.k===EN.voz?' selected':'')+'>'+esc(v.t)+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label>Formato</label><select data-en="fmt">'+[['Auto','Automático (según las imágenes)'],['9:16','9:16 vertical'],['16:9','16:9 horizontal'],['1:1','1:1 cuadrado'],['4:5','4:5 post vertical']].map(function(f){return '<option value="'+f[0]+'"'+(f[0]===EN.fmt?' selected':'')+'>'+f[1]+'</option>'}).join('')+'</select></div></div>'+
-   '<div class="f"><label>Clips e imágenes (se ordenan por nombre)</label><div class="acts"><label class="btn sm pri" for="enClips" style="cursor:pointer">Elegir clips</label><input type="file" id="enClips" accept="video/*,image/*" multiple hidden>'+(EN.clips.length?'<button class="btn sm" data-act="enlimpiar">Quitar todos</button>':'')+'</div>'+
+   '<div class="f"><label>Audio de voz desde un archivo o desde la carpeta del video</label><div class="acts"><label class="btn sm" for="enVoz" style="cursor:pointer">Elegir audio</label><input type="file" id="enVoz" accept="audio/*" hidden><button class="btn sm" data-act="encarpeta">Elegir carpeta del video</button>'+(EN.carpeta?'<span class="row-s">Carpeta: '+esc(EN.carpeta)+'</span>':'')+'</div><div class="row-s">'+(EN.vozFile?'✓ Audio en off: '+esc(EN.vozNom):'Sin audio de archivo')+' · Clips detectados: '+EN.clips.length+'</div></div><div class="f"><label>Clips e imágenes (se ordenan por nombre)</label><div class="acts"><label class="btn sm pri" for="enClips" style="cursor:pointer">Elegir clips</label><input type="file" id="enClips" accept="video/*,image/*" multiple hidden>'+(EN.clips.length?'<button class="btn sm" data-act="enlimpiar">Quitar todos</button>':'')+'</div>'+
    (EN.clips.length?'<div class="row-s" style="margin-top:6px">'+EN.clips.map(function(f,i){return (i+1)+'. '+esc(f.name)}).join(' · ')+'</div>':'<small>MP4, MOV, JPG o PNG. Los clips no se guardan: cárgalos cada vez.</small>')+'</div>'+
    '<div class="f"><label>Música de fondo (biblioteca de 26 pistas, sin derechos de autor)</label><select data-en="mus">'+opcionesMus()+'</select><div class="acts" style="margin-top:6px"><button class="btn sm" data-act="musprev">Escuchar</button><button class="btn sm" data-act="musstop">Parar</button><button class="btn sm" data-act="musdl">Descargar pista</button><label class="btn sm" for="enMus" style="cursor:pointer">Usar mi propia música</label><input type="file" id="enMus" accept="audio/*" hidden><span class="row-s">'+(EN.music?esc(EN.music.name):'Sin música')+'</span></div></div>'+
    '<div class="grid" style="grid-template-columns:1fr 1fr"><div class="f"><label>Volumen de la voz: '+EN.vv+'%</label><input type="range" min="0" max="150" data-en="vv" value="'+EN.vv+'"></div><div class="f"><label>Volumen de la música: '+EN.mv+'%</label><input type="range" min="0" max="100" data-en="mv" value="'+EN.mv+'"></div></div>'+
-   '<label class="row" style="border:0"><input type="checkbox" data-en="subs" style="width:auto"'+(EN.subs?' checked':'')+'><span>Subtítulos</span></label>'+
+   '<div class="panel" style="padding:12px 16px;margin:10px 0"><label class="row" style="border:0"><input type="checkbox" data-en="subs" style="width:auto"'+(EN.subs?' checked':'')+'><span><b>Subtítulos dinámicos</b> (usan el texto de la voz o del proyecto)</span></label><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">'+
+   [['subEstilo','Estilo y tipografía',[['auto','Automático (palabra resaltada)'],['clasico','Clásico (blanco)'],['grande','Negrita grande']]],['subColor','Color resaltado',[['#f5c242','Oro metálico'],['#ffffff','Blanco'],['#22d3ee','Cian'],['#ff6fa5','Rosa'],['#a3e635','Verde lima']]],['subPos','Posición en pantalla',[['inf','Tercio inferior (clásico Reels)'],['centro','Centro'],['sup','Parte superior']]],['subCaja','Fondo o contenedor',[['cristal','Caja de cristal'],['solida','Caja sólida'],['ninguna','Sin caja (con contorno)']]]].map(function(c){return '<div class="f"><label>'+c[1]+'</label><select data-en="'+c[0]+'">'+c[2].map(function(o){return '<option value="'+o[0]+'"'+(EN[c[0]]===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'}).join('')+'</div><div class="f"><label>Texto de los subtítulos (opcional, si no usas una voz guardada)</label><textarea data-en="subTexto" style="min-height:60px">'+esc(EN.subTexto)+'</textarea></div></div>'+
    '<div class="acts"><button class="btn" data-act="enprev"'+(EN.busy?' disabled':'')+'>Vista previa</button><button class="btn pri" data-act="enexp"'+(EN.busy?' disabled':'')+'>Exportar video</button>'+(EN.busy?'<button class="btn del" data-act="enstop">Detener</button>':'')+'</div><p class="row-s" id="enMsg" style="margin:8px 0 0"></p></div>'+
    '<div style="margin-top:14px"><canvas id="enc" width="'+dimsEn()[0]+'" height="'+dimsEn()[1]+'" style="max-height:62vh;width:auto;max-width:100%;background:#000;border-radius:12px;display:block"></canvas></div><p class="hint">Mantén esta pestaña abierta mientras se genera: el video se arma en tiempo real y se descarga como WebM.</p>';
 }
@@ -1566,21 +1718,21 @@ function ensRun(grabar){
   msg('Preparando clips y audio...');
   var AC=new (window.AudioContext||window.webkitAudioContext)(),dest=AC.createMediaStreamDestination();
   var dec=function(u){return u?fetch(u).then(function(r){return r.arrayBuffer()}).then(function(b){return AC.decodeAudioData(b)}):null};
-  var vP=EN.voz?vozUrl(EN.voz).then(dec):Promise.resolve(null),mP=EN.music?EN.music.arrayBuffer().then(function(b){return AC.decodeAudioData(b)}):Promise.resolve(null);
+  var vP=EN.vozFile?EN.vozFile.arrayBuffer().then(function(b){return AC.decodeAudioData(b)}):(EN.voz?vozUrl(EN.voz).then(dec):Promise.resolve(null)),mP=EN.music?EN.music.arrayBuffer().then(function(b){return AC.decodeAudioData(b)}):Promise.resolve(null);
   Promise.all([vP,mP,Promise.all(EN.clips.map(cargarClip))]).then(function(r){
     var vb=r[0],mb=r[1],items=r[2].filter(Boolean);
     if(!items.length)throw new Error('No se pudieron leer los clips.');
     if(!items.length)throw new Error('No se pudieron leer los clips.');
     var total=vb?vb.duration:items.reduce(function(t,i){return t+i.dur},0),ends=[],ac=0;
     items.forEach(function(it){ac+=vb?total/items.length:it.dur;ends.push(ac)});
-    var p=GVD.proj.filter(function(q){return q.id===EN.proy})[0],vt=vozTexto(EN.voz),base=vt||(p?(p.resultado.escenas||[]).map(function(e){return e.locucion||e.texto_pantalla||''}).filter(Boolean).join('\n'):''),segs=EN.subs&&base?tiemposSub(frases(base),total):[];
+    var p=GVD.proj.filter(function(q){return q.id===EN.proy})[0],vt=vozTexto(EN.voz),base=EN.subTexto||vt||(p?(p.resultado.escenas||[]).map(function(e){return e.locucion||e.texto_pantalla||''}).filter(Boolean).join('\n'):''),segs=EN.subs&&base?tiemposSub(frases(base),total):[];
     if(!mb&&EN.mus)mb=musicaSint(AC,EN.mus,total);
     var srcs=[];
     var conectar=function(buf,vol,loop){var s=AC.createBufferSource(),g=AC.createGain();s.buffer=buf;s.loop=!!loop;g.gain.value=vol;s.connect(g);g.connect(dest);if(!grabar)g.connect(AC.destination);srcs.push(s)};
     if(vb)conectar(vb,EN.vv/100,false);if(mb)conectar(mb,EN.mv/100,!!EN.music);
     var chunks=[],mr=null;
     if(grabar){
-      var st=cv.captureStream(30);dest.stream.getAudioTracks().forEach(function(t){st.addTrack(t)});
+      var st=cv.captureStream(30);if(srcs.length)dest.stream.getAudioTracks().forEach(function(t){st.addTrack(t)});
       var mime=window.MediaRecorder&&MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
       mr=new MediaRecorder(st,{mimeType:mime});mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};mr.start(250);
     }
@@ -1601,13 +1753,7 @@ function ensRun(grabar){
       if(it.t==='vid'){if(seg!==si){items.forEach(function(i){if(i.t==='vid')i.el.pause()});it.el.currentTime=0;it.el.play().catch(function(){})}}
       seg=si;cubrir(x,it.el,W,H);
       var sg=segs.filter(function(q){return t>=q.a&&t<q.b})[0];
-      if(sg){
-        var tx=sg.txt,fs=Math.round(Math.min(W,H)*0.06);
-        x.font='700 '+fs+'px sans-serif';x.textAlign='center';x.textBaseline='top';
-        var ws=tx.split(' '),ls=[],l='';ws.forEach(function(w){var q=l?l+' '+w:w;if(x.measureText(q).width>W*0.86&&l){ls.push(l);l=w}else l=q});ls.push(l);
-        var bh=ls.length*fs*1.25+16,y0=H-bh-H*0.08;x.fillStyle='rgba(0,0,0,.6)';x.fillRect(W*0.04,y0,W*0.92,bh);x.fillStyle='#fff';
-        ls.forEach(function(q,i){x.fillText(q,W/2,y0+8+i*fs*1.25)});
-      }
+      if(sg)dibujarSub(x,W,H,sg,t);
       if(grabar)msg('Grabando... '+Math.round(t)+' / '+Math.round(total)+' s');
       requestAnimationFrame(frame);
     };
@@ -1660,7 +1806,7 @@ function formPlanSem(){
   abrirD2('Plan semanal con Gemini','<form id="frmPS" class="pw" style="max-width:none"><div class="f"><label>Días a publicar</label><div class="acts" style="flex-wrap:wrap">'+DIAS_PS.map(function(d,i){return '<label class="btn sm" style="cursor:pointer"><input type="checkbox" name="dia" value="'+d+'"'+(i===0||i===2||i===4?' checked':'')+' style="width:auto"> '+d+'</label>'}).join('')+'</div></div><div class="f"><label for="ps1">Tema o enfoque (opcional)</label><input type="text" id="ps1" placeholder="Ej: promoción de fin de mes"></div><div class="f"><label for="ps2">Diapositivas por carrusel</label><select id="ps2"><option>3</option><option selected>4</option><option>5</option></select></div><p id="psMsg" class="row-s"></p><div><button type="submit" class="btn pri">Crear plan</button></div></form>');
 }
 function promptPlanSem(a,dias,n,tema){
-  return 'Eres estratega de redes sociales para negocios locales de Colombia. Crea un plan semanal con un carrusel de '+n+' diapositivas por cada uno de estos días: '+dias.join(', ')+'.\n\nNEGOCIO: '+a.nombre+' ('+a.tipo+(a.ciudad?', '+a.ciudad:'')+'). Productos: '+(a.productos||'no indicados')+'. Diferenciales: '+(a.diferenciales||'no indicados')+'. Público: '+(a.publico||'general')+'. Tono: '+(a.tono||'Cercano')+'. Objetivo: '+(a.objetivo||'Vender más')+(a.whatsapp?'. WhatsApp: '+a.whatsapp:'')+'.'+fichaExtra(a)+(tema?'\nENFOQUE DE LA SEMANA: '+tema:'')+
+  return 'Eres estratega de redes sociales para negocios locales de Colombia. Crea un plan semanal con un carrusel de '+n+' diapositivas por cada uno de estos días: '+dias.join(', ')+'.\n\nNEGOCIO: '+a.nombre+' ('+a.tipo+(a.ciudad?', '+a.ciudad:'')+'). Productos: '+(a.productos||'no indicados')+'. Diferenciales: '+(a.diferenciales||'no indicados')+'. Público: '+(a.publico||'general')+'. Tono: '+(a.tono||'Cercano')+'. Objetivo: '+(a.objetivo||'Vender más')+(a.whatsapp?'. WhatsApp: '+a.whatsapp:'')+'.'+fichaExtra(a)+regionBloque(a)+(tema?'\nENFOQUE DE LA SEMANA: '+tema:'')+
    '\n\nVaría el tema de cada día (producto, beneficios, consejo útil, historia del negocio, promoción). Cada diapositiva: t (título corto, máximo 8 palabras), b (texto, máximo 20 palabras) y cta (solo en la última, vacío en las demás). Español colombiano.\nResponde SOLO con un arreglo JSON válido, sin texto extra:\n[{"dia":"","titulo":"","slides":[{"t":"","b":"","cta":""}],"copy":"texto para la publicación con emojis moderados","hashtags":["#"]}]';
 }
 function leerPlan(t){
@@ -1931,7 +2077,7 @@ var TX_T=[['post','Publicación (copy)'],['historia','Historias (5 pantallas)'],
 var EMO_T={cafe:'☕',resto:'🍽️',tipica:'🍴',vela:'🕯️',pan:'🥐',belleza:'💅',moda:'👗',tech:'📺',salud:'🌿',tienda:'🛍️',naturaleza:'🌿',emoji:'✨'};
 function fichaCompleta(a){
   var f=[['Nombre',a.nombre],['Tipo de negocio',a.tipo],['Ciudad o barrio',a.ciudad],['Productos o servicios',a.productos],['Lo que lo hace diferente',a.diferenciales],['Público',a.publico],['Tono',a.tono],['Objetivo',a.objetivo],['WhatsApp',a.whatsapp],['Instagram',a.instagram],['Facebook',a.facebook],['TikTok',a.tiktok],['Notas (horarios, pagos, domicilios, promociones)',a.notas]];
-  return f.filter(function(x){return x[1]&&String(x[1]).trim()}).map(function(x){return x[0]+': '+String(x[1]).trim()}).join('\n');
+  return f.filter(function(x){return x[1]&&String(x[1]).trim()}).map(function(x){return x[0]+': '+String(x[1]).trim()}).join('\n')+'\nRegión y acento: '+REG[regionDe(a)].n+'\nUniverso visual: '+(NICHOV[nichoDe(a)]||'');
 }
 function fichaExtra(a){
   var f=[['Instagram',a.instagram],['Facebook',a.facebook],['TikTok',a.tiktok],['Notas',a.notas]].filter(function(x){return x[1]&&String(x[1]).trim()});
@@ -1951,12 +2097,12 @@ function extrasEmp(a){
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function datosTx(a){
   var lim=function(x){return x.replace(/\s+etc\.?$/i,'').trim()},pr=listaTxt(a.productos).map(lim).filter(function(x){return x&&!/^etc\.?$/i.test(x)}),df=listaTxt(a.diferenciales).map(lim).filter(Boolean),w=a.whatsapp,ig=a.instagram;
-  return {n:a.nombre,ciu:a.ciudad||'tu ciudad',pr:pr,df:df,pub:a.publico||'todos',em:EMO_T[temaSugerido(a)]||'✨',e:extrasEmp(a),ig:ig,w:w,tono:a.tono||'Cercano',tipo:a.tipo||'negocio',
+  return {n:a.nombre,ciu:a.ciudad||'tu ciudad',pr:pr,df:df,pub:a.publico||'todos',em:EMO_T[temaSugerido(a)]||'✨',e:extrasEmp(a),ig:ig,w:w,tono:a.tono||'Cercano',tipo:a.tipo||'negocio',reg:REG[regionDe(a)],
     cta:w?'Escríbenos al WhatsApp '+w:'Escríbenos'+(ig?' o síguenos en '+ig:'')};
 }
 function ganchosTx(D){
   var h={Cercano:['¿Ya probaste '+D.p1+'?','Hoy es un buen día para '+D.p1,'Te esperamos en '+D.ciu,'Antójate de '+D.p1,'Pasa por '+D.n+' y consiéntete'],Profesional:['Conoce '+D.p1+' de '+D.n,'Calidad y buen servicio en '+D.ciu,D.n+': '+D.d1],Divertido:['¡Alerta de antojo!','Tu '+D.p1+' te está esperando 😋','Plan perfecto: '+D.p1],Elegante:['Una experiencia pensada para ti','Hecho con dedicación: '+D.p1],Familiar:['Para compartir en familia','Como en casa: '+D.p1]};
-  return h[D.tono]||h.Cercano;
+  return (h[D.tono]||h.Cercano).concat([D.reg.saludo+' ¿Ya probaste '+D.p1+'?']);
 }
 function infoTx(D){var o=[];if(D.e.promo)o.push('🔥 '+D.e.promo);if(D.e.horario)o.push('🕒 '+D.e.horario);if(D.e.dom)o.push('🛵 '+D.e.dom);if(D.e.pagos)o.push('💳 '+D.e.pagos);if(D.e.web)o.push('🌐 '+D.e.web);return o}
 function crearTextos(a,tipo){
@@ -1995,7 +2141,7 @@ function crearTextos(a,tipo){
 }
 function promptTX(a){
   var lb=TX_T.filter(function(x){return x[0]===TX.tipo})[0][1];
-  return 'Eres community manager experto en negocios locales de Colombia. Con TODOS estos datos reales del negocio, escribe 5 versiones distintas de: '+lb+', para '+TX.red+'. Usa solo información real de los datos (no inventes precios, horarios ni promociones). Español colombiano, tono '+(a.tono||'cercano').toLowerCase()+', con emojis moderados y un llamado a la acción claro.\n\nDATOS DEL NEGOCIO:\n'+fichaCompleta(a)+'\n\nEntrega solo los textos, numerados, sin explicaciones.';
+  return 'Eres community manager experto en negocios locales de Colombia. Con TODOS estos datos reales del negocio, escribe 5 versiones distintas de: '+lb+', para '+TX.red+'. Usa solo información real de los datos (no inventes precios, horarios ni promociones). Español colombiano, tono '+(a.tono||'cercano').toLowerCase()+', con emojis moderados y un llamado a la acción claro.\n\nDATOS DEL NEGOCIO:\n'+fichaCompleta(a)+regionBloque(a)+'\n\nEntrega solo los textos, numerados, sin explicaciones.';
 }
 function vTextos(){
   var a=activa();
@@ -2011,6 +2157,164 @@ function vTextos(){
    '<h2>Textos listos ('+TX.res.length+')</h2><div class="grid">'+TX.res.map(function(t,i){return '<article class="card"><div class="pre" style="margin:0">'+esc(t)+'</div><div class="acts">'+cp(t)+'<button class="btn sm" data-act="txguardar" data-id="'+i+'">Guardar</button></div></article>'}).join('')+'</div>';
 }
 document.addEventListener('change',function(ev){var k=ev.target.getAttribute&&ev.target.getAttribute('data-tx');if(k){TX[k]=ev.target.value;if(k==='tipo'){TX.res=[];TX.ia='';renderMain()}}});
+/* Región, tipo de servicio y acento */
+var REG={
+ paisa:{n:'Paisa (Antioquia y Eje Cafetero)',acento:'Colombian Paisa (Antioquia)',saludo:'¡Quiubo, parce!',cierre:'Pásese por acá, que lo atendemos con todo el gusto.',vocab:['parce','mijo','pues','bacano','berraco','a la orden','¿vamos o qué?'],cultura:'la arriería, el café, la trova, los silleteros, la arepa, el chocolate y las montañas'},
+ costa:{n:'Costeño (Caribe)',acento:'Colombian Caribbean coast',saludo:'¡Ajá, mi llave!',cierre:'Aquí te esperamos, con sabor y buena vibra.',vocab:['mi llave','ajá','qué bacano','a lo bien','pelao'],cultura:'el carnaval, la cumbia, el vallenato, la champeta, el patacón, el mar y la brisa'},
+ pacifico:{n:'Pacífico colombiano',acento:'Colombian Pacific coast',saludo:'¡Ajá, mi gente!',cierre:'Ven y prueba el sabor ancestral del Pacífico.',vocab:['mi gente','sabor','ancestral'],cultura:'la marimba, el currulao, la selva, los ríos, el manglar, el viche, el borojó, el chontaduro y el encocado'},
+ valle:{n:'Valle del Cauca (Cali)',acento:'Colombian Cali (Valle del Cauca)',saludo:'¡Oiga, mijo!',cierre:'Lo esperamos con sabor y con salsa.',vocab:['oiga','mijo','sabrosura','rico'],cultura:'la salsa, el pandebono, el cholado, el champús, el sancocho de gallina y el clima cálido'},
+ bogota:{n:'Bogotá y Cundiboyacense',acento:'Colombian Bogotá Andean',saludo:'¡Hola, bienvenido!',cierre:'Con gusto lo atendemos.',vocab:['con gusto','listo','chévere','a la orden'],cultura:'el ajiaco, el tamal, el chocolate con queso, el páramo, la carranga y el altiplano'},
+ opita:{n:'Tolima y Huila (opita)',acento:'Colombian Tolima and Huila (opita)',saludo:'¡Ave María, qué belleza!',cierre:'Vea pues, aquí lo esperamos.',vocab:['ave maría','vea pues','mijo','qué belleza'],cultura:'la lechona tolimense, el tamal, el bambuco, las fiestas de San Pedro, las achiras y el café'},
+ santander:{n:'Santandereano',acento:'Colombian Santander',saludo:'¡Pues sí, venga!',cierre:'Hágale, que aquí lo atendemos como se merece.',vocab:['hágale','pues sí','mi amor'],cultura:'el cabrito, el mute, la hormiga culona, la tradición y el cañón del Chicamocha'},
+ llanero:{n:'Llanero',acento:'Colombian Llanos',saludo:'¡Hágale pues, compadre!',cierre:'Pase por acá, que le tenemos lo mejor de la sabana.',vocab:['compadre','hágale'],cultura:'el joropo, la ternera a la llanera, la sabana y los atardeceres'},
+ neutro:{n:'Neutro latinoamericano',acento:'neutral Latin American',saludo:'¡Hola!',cierre:'Te esperamos.',vocab:[],cultura:''}
+};
+var ACENTOS={};Object.keys(REG).forEach(function(k){ACENTOS[REG[k].n]=REG[k].acento});
+VZ.acento=REG.paisa.n;
+var NICHOS={cafe:'Café y desayunos',resto:'Restaurante',tipica:'Lechona y comida típica',vela:'Velas, aromas y artesanías',pan:'Panadería y postres',belleza:'Belleza y estética',moda:'Moda y ropa',tech:'Tecnología y streaming',salud:'Salud y bienestar',tienda:'Tienda y comercio',licor:'Licores y bebidas (solo adultos)',servicios:'Servicios profesionales',naturaleza:'Naturaleza y otros'};
+var NICHOV={cafe:'primeros planos de tazas humeantes, arte latte, granos de café, barras de madera cálida y luz de mañana',resto:'platos servidos con vapor, cubiertos, manos sirviendo, mesas compartidas y luz cálida de restaurante',tipica:'hojas de plátano, ollas humeantes, lechona dorada y crujiente, manos sirviendo y mesas familiares',vela:'luz de vela suave, cera derritiéndose, llamas en primer plano e interiores acogedores',pan:'masa amasándose, pan recién horneado, vapor, harina en el aire y vitrinas',belleza:'rostros sonrientes, productos de cuidado, texturas cremosas, espejos y luz suave',moda:'telas en movimiento, percheros, detalles de costuras y personas con la ropa del negocio',tech:'pantallas, interfaces de streaming, controles remotos y salas con luz azulada',salud:'plantas, ingredientes naturales, movimientos suaves y luz natural',tienda:'estantes ordenados, bolsas, clientes comprando, mostrador y etiquetas',licor:'copas de cristal, hielo, líquido ámbar sirviéndose y reuniones sociales entre adultos mayores de 18 años',servicios:'profesionales atendiendo, manos trabajando, oficinas o talleres y resultados antes y después',naturaleza:'hojas, luz natural y texturas orgánicas'};
+var NICHOG={
+ cafe:{h:['El café de la mañana cambia el día.','¿Ya tomaste tu café hoy?'],b:['Granos seleccionados y preparación al momento.','Un desayuno caliente para empezar bien.'],c:'Ven por tu café.',e:'sensorial y cálido: aroma, vapor y primer sorbo; momentos de pausa y compañía'},
+ resto:{h:['¿Qué almorzamos hoy?','Esta mesa te está esperando.'],b:['Platos servidos al momento, con sazón de casa.','Ideal para ir en familia o con amigos.'],c:'Reserva tu mesa.',e:'antojo y encuentro: platos humeantes, mesa compartida, sazón casera'},
+ tipica:{h:['Sabor tradicional que se siente en casa.','Hoy toca comida de la buena.'],b:['Receta de siempre, hecha con paciencia y cariño.','Porciones generosas para compartir.'],c:'Haz tu pedido.',e:'tradición y orgullo regional: recetas de familia, fogón, mesa grande'},
+ vela:{h:['Dale a tu casa un ambiente que se sienta.','Un aroma puede cambiar tu noche.'],b:['Hechas a mano, una por una.','Un detalle perfecto para regalar.'],c:'Encarga la tuya.',e:'calma y detalle: luz suave, aromas, trabajo hecho a mano, regalo con significado'},
+ pan:{h:['Pan recién horneado, todavía calientico.','Antojo dulce en 3, 2, 1.'],b:['Horneamos cada día para que llegue fresco.','Tortas y postres por encargo para tu celebración.'],c:'Encarga tu pedido.',e:'antojo y celebración: horno, aroma a pan, vitrina, momentos de fiesta'},
+ belleza:{h:['Te mereces un momento solo para ti.','Sal sintiéndote increíble.'],b:['Atención personalizada y productos de calidad.','Resultados que se notan, con cuidado y confianza.'],c:'Agenda tu cita.',e:'confianza y autocuidado: trato personalizado, antes y después sin exagerar'},
+ moda:{h:['Estrena look esta semana.','Lo que buscabas para lucir bien.'],b:['Prendas cómodas, con estilo y a buen precio.','Tallas y colores para todos.'],c:'Mira el catálogo.',e:'estilo y actitud: telas, colores, combinaciones, tallas para todos'},
+ tech:{h:['Tu entretenimiento, sin complicarte.','Más series, más películas, menos pagar de más.'],b:['Activación rápida y soporte cuando lo necesites.','Funciona en tu televisor, celular y computador.'],c:'Pide tu activación.',e:'claro y directo: ahorro, rapidez, soporte; sin jerga técnica'},
+ salud:{h:['Cuida tu rutina de bienestar.','Pequeños hábitos, gran diferencia.'],b:['Productos naturales pensados para tu día a día.','Orientación cercana y sin presiones.'],c:'Pide tu información.',e:'cuidado y cercanía: hábitos, ingredientes naturales; sin promesas médicas ni curas'},
+ tienda:{h:['Todo lo que necesitas, cerquita de ti.','Pasa y llévate lo que buscabas.'],b:['Buen precio y atención de barrio.','Productos de siempre y novedades cada semana.'],c:'Pasa a visitarnos.',e:'cercanía de barrio: precio justo, confianza, atención por nombre'},
+ licor:{h:['Un buen brindis hace la noche.','Para celebrar con los tuyos, entre adultos.'],b:['Preparado con tradición y presentación cuidada.','Ideal para compartir en reuniones de adultos.'],c:'Haz tu pedido.',e:'celebración responsable entre adultos: tradición, brindis, encuentro; sin sugerencias sexuales ni de salud'},
+ servicios:{h:['Resuelve eso pendiente hoy.','Un profesional de confianza hace la diferencia.'],b:['Atención puntual, clara y con respaldo.','Te explicamos cada paso, sin letra menuda.'],c:'Agenda tu asesoría.',e:'confianza y claridad: experiencia, puntualidad, pasos simples'},
+ naturaleza:{h:['Descubre algo hecho con cariño.','Lo bueno se nota.'],b:['Hecho con dedicación y buenos ingredientes.','Calidad que puedes sentir.'],c:'',e:'cercano y auténtico'}
+};
+var REGX={
+ paisa:{r:'Ritmo ágil y amable, con calidez montañera',m:'carrilera, trova y guitarras suaves'},
+ costa:{r:'Ritmo alegre, relajado y musical',m:'vallenato, cumbia o champeta suave'},
+ pacifico:{r:'Cadencia musical y pausada, con fuerza ancestral',m:'marimba, currulao y cununos'},
+ valle:{r:'Ritmo sabroso y enérgico',m:'salsa instrumental'},
+ bogota:{r:'Ritmo claro, pausado y cortés',m:'música andina o carranga suave'},
+ opita:{r:'Ritmo cálido, amable y casi cantado',m:'bambuco y rajaleña'},
+ santander:{r:'Directo, franco y cálido',m:'música andina con tiple'},
+ llanero:{r:'Pausado y amplio, tono de sabana',m:'joropo con arpa y cuatro'},
+ neutro:{r:'Claro, neutro y amable',m:'instrumental suave'}
+};
+function regionDe(a,reg){
+  if(reg&&REG[reg])return reg;
+  if(a&&a.region&&REG[a.region])return a.region;
+  var c=norm((a&&a.ciudad)||'');
+  if(/tolima|ibague|huila|neiva/.test(c))return 'opita';
+  if(/barranquilla|cartagena|santamarta|caribe|monteria|sincelejo/.test(c))return 'costa';
+  if(/buenaventura|tumaco|choco|quibdo|pacifico/.test(c))return 'pacifico';
+  if(/cali|valle|palmira|tulua|buga/.test(c))return 'valle';
+  if(/bogota|boyaca|tunja|cundinamarca|zipaquira/.test(c))return 'bogota';
+  if(/bucaramanga|santander|barrancabermeja/.test(c))return 'santander';
+  if(/yopal|villavicencio|llano|meta|arauca/.test(c))return 'llanero';
+  return 'paisa';
+}
+function nichoDe(a,nic){
+  if(nic&&NICHOS[nic])return nic;
+  if(a&&a.nicho&&NICHOS[a.nicho])return a.nicho;
+  var t=norm(((a&&a.nombre)||'')+' '+((a&&a.productos)||''));
+  if(/viche|licor|aguardiente|ron|cerveza|vino|coctel|trago|bebidaalcoh/.test(t))return 'licor';
+  if(a&&a.tipo==='Servicios profesionales')return 'servicios';
+  if(a&&a.tipo==='Cafetería')return 'cafe';
+  return temaSugerido(a||{});
+}
+function regionBloque(a,reg,nic){
+  var R=REG[regionDe(a,reg)],n=nichoDe(a,nic),o='\nREGIÓN Y ACENTO: '+R.n+'.';
+  if(R.vocab.length)o+=' Usa con medida expresiones propias de la región ('+R.vocab.join(', ')+'), el saludo "'+R.saludo+'" y referentes culturales como '+R.cultura+'. El español debe sonar natural y respetuoso, sin caricatura.';
+  o+='\nUNIVERSO VISUAL DEL NEGOCIO: '+(NICHOV[n]||NICHOV.naturaleza)+'.';
+  o+='\nESTILO DE COMUNICACIÓN DEL SERVICIO ('+NICHOS[n]+'): '+(NICHOG[n]||NICHOG.naturaleza).e+'.';
+  var RX=REGX[regionDe(a,reg)]||REGX.neutro;o+='\nENTONACIÓN: '+RX.r+'. Música sugerida: '+RX.m+'.';
+  o+='\nNo hagas afirmaciones médicas, ni promesas de resultados garantizados.';
+  if(n==='licor')o+='\nEs un producto para adultos: no apuntes a menores de edad e incluye al final este aviso: "Prohibida la venta a menores de edad. El exceso de alcohol es perjudicial para la salud."';
+  return o;
+}
+/* Plantillas de guion por región y tipo de servicio */
+var PT={dur:'30',reg:'',nicho:'',res:[],meta:[],regs:[]};
+function crearGuionOffline(a,dur,reg,nic){
+  var R=REG[regionDe(a,reg)],n=nichoDe(a,nic),D=datosTx(a),e=D.e,obj=Math.round(Number(dur)*2.3);
+  var p1=pick(D.pr.length?D.pr:[D.tipo]),d1=pick(D.df.length?D.df:['atención cercana']);
+  var G=NICHOG[n]||NICHOG.naturaleza,hooks=[R.saludo+' ¿Ya probaste '+p1+'?','¿Buscas '+p1+' en '+D.ciu+'?','Esto es lo que más nos piden en '+D.n+': '+p1+'.','Hoy te cuento por qué todos hablan de '+p1+'.'].concat(G.h);
+  var cuerpo=['En '+D.n+', '+D.ciu+', lo hacemos con '+d1+'.',D.pr.length>1?'Tenemos '+D.pr.slice(0,4).join(', ')+'.':'Es el sabor de siempre, hecho con cariño.',R.cultura?'Aquí se siente '+R.cultura.split(', ')[0]+'.':'',e.promo?'Ahora: '+e.promo+'.':'',e.horario?'Te atendemos '+e.horario+'.':'',e.dom?'Y lo llevamos a tu puerta: '+e.dom+'.':'','Pensado para '+D.pub+'.',pick(G.b)].filter(Boolean).sort(function(){return Math.random()-0.5});
+  var cta=(G.c?G.c+' ':'')+D.cta+'. '+R.cierre,parts=[pick(hooks)];
+  cuerpo.forEach(function(x){if(palabras(parts.join(' '))+palabras(cta)+palabras(x)<=obj)parts.push(x)});
+  parts.push(cta);
+  if(n==='licor')parts.push('Prohibida la venta a menores de edad. El exceso de alcohol es perjudicial para la salud.');
+  return parts.join(' ');
+}
+function segGuion(t,a){
+  var ps=String(t||'').replace(/([.!?])\s+/g,'$1\u0001').split('\u0001'),n=ps.length;
+  return ps.map(function(x,i){
+    var h=resaltar(x,a),cl=/Prohibida la venta/.test(x)?'sg-a':(i===0?'sg-h':(i>=n-3&&/escr[ií]b|whatsapp|reserva|pide|visita|agenda|encarga|haz tu pedido|mira el/i.test(x)?'sg-c':''));
+    return cl?'<span class="'+cl+'">'+h+'</span>':h;
+  }).join(' ');
+}
+function metaPT(i,a){var m=(PT.meta||[])[i];return m||{reg:regionDe(a,PT.reg),nicho:nichoDe(a,PT.nicho)}}
+function tituloPT(i){var a=activa(),m=metaPT(i,a);return 'Guion '+REG[m.reg].n+' · '+NICHOS[m.nicho]+' · '+PT.dur+' s'}
+function pintarPlant(b){
+  var a=activa(),R=REG[regionDe(a,PT.reg)],RX=REGX[regionDe(a,PT.reg)]||REGX.neutro,G=NICHOG[nichoDe(a,PT.nicho)]||NICHOG.naturaleza;
+  b.innerHTML='<p class="sub" style="margin:0 0 12px">Guiones de locución listos, sin clave, adaptados a la región y al tipo de servicio, con los datos de '+esc(a.nombre)+'.</p><div class="panel" style="padding:14px 16px"><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))"><div class="f"><label>Duración</label><select data-pt="dur">'+['15','30','45','60'].map(function(x){return '<option value="'+x+'"'+(x===PT.dur?' selected':'')+'>'+x+' segundos</option>'}).join('')+'</select></div><div class="f"><label>Región y acento</label><select data-pt="reg">'+regOpts(PT.reg)+'</select></div><div class="f"><label>Tipo de servicio</label><select data-pt="nicho">'+nichoOpts(PT.nicho)+'</select></div></div><div class="acts" style="margin-top:10px"><button class="btn pri" data-act="ptcrear">Crear guiones</button></div>'+
+   '<div class="row-t" style="margin-top:14px">Misma cuña en varias regiones</div><p class="row-s" style="margin:2px 0 8px">Marca las regiones y crea una versión para cada una, con su saludo, su cierre y sus referentes.</p><div class="chips">'+Object.keys(REG).filter(function(k){return k!=='neutro'}).map(function(k){return '<button type="button" class="rtog'+(PT.regs.indexOf(k)>=0?' on':'')+'" data-act="ptregtog" data-id="'+k+'">'+esc(REG[k].n)+'</button>'}).join('')+'</div><div class="acts" style="margin-top:10px"><button class="btn" data-act="ptcrearr">Crear una por región ('+PT.regs.length+')</button></div>'+
+   '<p class="row-s" style="margin:12px 0 0"><b>'+esc(R.n)+':</b> '+(R.vocab.length?esc(R.vocab.join(', '))+'. ':'')+esc(R.cultura)+'.<br><b>Entonación:</b> '+esc(RX.r)+'. <b>Música sugerida:</b> '+esc(RX.m)+'.<br><b>Estilo del servicio:</b> '+esc(G.e)+'.</p></div>'+
+   (PT.res.length?'<h2>Guiones ('+PT.res.length+')</h2><div class="grid">'+PT.res.map(function(t,i){var m=metaPT(i,a),rx=REGX[m.reg]||REGX.neutro;return '<article class="card"><div class="chips"><span class="badge">'+esc(REG[m.reg].n)+'</span><span class="badge mut">'+esc(NICHOS[m.nicho])+'</span></div><div class="row-s">'+palabras(t)+' palabras · ~'+Math.round(palabras(t)/2.3)+' s · '+esc(rx.r)+'</div><div class="pre" style="margin:0;line-height:1.8">'+segGuion(t,a)+'</div><div class="acts">'+cp(t)+'<button class="btn sm pri" data-act="ptvoz" data-id="'+i+'">Usar en Voz</button><button class="btn sm" data-act="ptguardar" data-id="'+i+'">Guardar</button></div></article>'}).join('')+'</div>':'<div class="empty"><b>Aún no hay guiones</b>Pulsa "Crear guiones".</div>');
+}
+document.addEventListener('change',function(ev){var k=ev.target.getAttribute&&ev.target.getAttribute('data-pt');if(k){PT[k]=ev.target.value;pintarGV()}});
+function dibujarSub(x,W,H,sg,t){
+  var fs=Math.round(Math.min(W,H)*(EN.subEstilo==='grande'?0.075:0.058)),F='800 '+fs+'px sans-serif';
+  x.font=F;x.textBaseline='top';x.textAlign='left';
+  var ws=sg.txt.split(' '),ls=[],l=[],i;
+  ws.forEach(function(w){var q=l.concat([w]).join(' ');if(x.measureText(q).width>W*0.84&&l.length){ls.push(l);l=[w]}else l.push(w)});ls.push(l);
+  var idx=Math.min(ws.length-1,Math.floor((t-sg.a)/Math.max(0.01,sg.b-sg.a)*ws.length)),lh=fs*1.3,bh=ls.length*lh+fs*0.5,y0=EN.subPos==='sup'?H*0.09:EN.subPos==='centro'?(H-bh)/2:H-bh-H*0.1;
+  if(EN.subCaja==='cristal'){x.fillStyle='rgba(255,255,255,.16)';rr(x,W*0.05,y0-fs*0.1,W*0.9,bh,fs*0.5);x.fill();x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=2;x.stroke()}
+  else if(EN.subCaja==='solida'){x.fillStyle='rgba(0,0,0,.7)';rr(x,W*0.05,y0-fs*0.1,W*0.9,bh,fs*0.4);x.fill()}
+  var g=0;
+  ls.forEach(function(ln,r){
+    var tw=x.measureText(ln.join(' ')).width,xx=W/2-tw/2,yy=y0+fs*0.25+r*lh;
+    ln.forEach(function(w){
+      var hl=EN.subEstilo!=='clasico'&&g===idx;
+      x.lineWidth=fs*0.16;x.lineJoin='round';x.strokeStyle='rgba(0,0,0,.85)';
+      if(EN.subCaja==='ninguna'||EN.subCaja==='cristal')x.strokeText(w,xx,yy);
+      x.fillStyle=hl?EN.subColor:'#ffffff';x.fillText(w,xx,yy);
+      xx+=x.measureText(w+' ').width;g++;
+    });
+  });
+}
+async function leerCarpetaVideo(h){
+  var clips=[],audio=null,ent,f;
+  for await(ent of h.values()){
+    if(ent.kind!=='file')continue;f=await ent.getFile();
+    if(/^video\//.test(f.type)||/^image\//.test(f.type))clips.push(f);
+    else if(/^audio\//.test(f.type)||/\.(mp3|wav|m4a|ogg)$/i.test(f.name)){if(!audio||f.size>audio.size)audio=f}
+  }
+  clips.sort(function(a,b){return a.name.localeCompare(b.name,'es',{numeric:true})});
+  EN.clips=clips;EN.carpeta=h.name;if(audio){EN.vozFile=audio;EN.vozNom=audio.name}
+  await calcAuto();pintarGV();
+  toast('Carpeta leída: '+clips.length+' clips'+(audio?' y audio en off':', sin audio'));
+}
+document.addEventListener('change',function(ev){if(ev.target.id==='enVoz'){var f=ev.target.files&&ev.target.files[0];ev.target.value='';if(f){EN.vozFile=f;EN.vozNom=f.name;pintarGV()}}});
+/* Llevar los datos y trabajar sin internet */
+function estadoOffline(){return !!(navigator.serviceWorker&&navigator.serviceWorker.controller)}
+function hintFinal(){
+  return '<p class="hint"><b>Sin internet:</b> '+(estadoOffline()?'activo. La aplicación abre aunque no haya conexión (solo la IA y las fuentes necesitan internet).':'se activa la primera vez que abres la dirección con internet. Instálala con el botón del menú o con el acceso directo para abrirla sin conexión.')+'<br><b>Llevar tus datos:</b> por USB, correo o Drive; en el otro equipo elige <b>Combinar</b> y no se pierde nada de ninguno de los dos. El respaldo completo lleva todo. El liviano no lleva audios ni imágenes y cabe en un correo. Con una carpeta de Drive u OneDrive sincronizada no tienes que mover archivos. La clave protege el acceso en este navegador.</p>';
+}
+function compartirRespaldo(){
+  construirRespaldo(true).then(function(r){
+    var nombre='mpconsultoria-respaldo-'+sello(r.now)+'-liviano.json',json=JSON.stringify(r.data);
+    var f=new File([json],nombre,{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      navigator.share({files:[f],title:'Respaldo de MPCONSULTORIA',text:'Respaldo de mis datos (liviano)'}).then(function(){marcarRespaldo(r.now);toast('Respaldo compartido')},function(){});
+    }else{
+      descargarJson(json,nombre);marcarRespaldo(r.now);
+      toast('Este navegador no puede compartir archivos: lo descargué. Adjúntalo al correo o súbelo a Drive.');
+    }
+  });
+}
+var DEFER=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();DEFER=e;var b=$('#btnInst');if(b)b.hidden=false});
+window.addEventListener('appinstalled',function(){DEFER=null;var b=$('#btnInst');if(b)b.hidden=true;toast('Aplicación instalada')});
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 /* Clave de acceso única */
 var AKEY='mpconsultoria_auth_v1',SKEY='mpconsultoria_sesion',unlocked=false,fails=0,lockUntil=0;
 function getAuth(){try{return JSON.parse(localStorage.getItem(AKEY))}catch(e){return null}}
@@ -2310,21 +2614,22 @@ function fmtFecha(d){return d.toLocaleDateString('es-CO',{day:'numeric',month:'l
 function clavesIncl(){try{return localStorage.getItem('mpconsultoria_resclaves')!=='0'}catch(e){return true}}
 function sello(d){return iso(d)+'_'+('0'+d.getHours()).slice(-2)+'-'+('0'+d.getMinutes()).slice(-2)}
 function marcarRespaldo(now){try{localStorage.setItem(BKEY,now.toISOString())}catch(e){}DIRTY=false}
-function construirRespaldo(){
+function construirRespaldo(liv){
   var falloIdb=false,now=new Date();
   return kvAll().catch(function(){falloIdb=true;return {}}).then(function(all){
     var legacy={},voces={},imgs={},extra={};
     Object.keys(all).forEach(function(k){if(k.indexOf('legacy:')===0)legacy[k.slice(7)]=all[k];else if(k.indexOf('voz:')===0)voces[k.slice(4)]=all[k];else if(k.indexOf('img:')===0)imgs[k.slice(4)]=all[k]});
     Object.keys(S).forEach(function(k){if(['empresas','activa','imports','informe'].indexOf(k)<0)extra[k]=S[k]});
+    if(liv){legacy={};voces={};imgs={}}
     var datos={empresas:S.empresas,activa:S.activa,imports:S.imports||{},legacy:legacy,voces:voces,imgs:imgs,extra:extra};
     if(clavesIncl()){var g=gk(),ac=getAuth();if(g&&g.k)datos.gemini=g;if(ac&&ac.hash)datos.acceso=ac}
-    return {falloIdb:falloIdb,now:now,data:{app:'MPCONSULTORIA',version:3,fecha:now.toISOString(),datos:datos}};
+    return {falloIdb:falloIdb,now:now,data:{app:'MPCONSULTORIA',version:3,liviano:!!liv,fecha:now.toISOString(),datos:datos}};
   });
 }
 function descargarJson(json,nombre){var blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=nombre;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1500)}
-function exportar(){
-  construirRespaldo().then(function(r){
-    descargarJson(JSON.stringify(r.data),'mpconsultoria-respaldo-'+sello(r.now)+'.json');
+function exportar(liv){
+  construirRespaldo(liv).then(function(r){
+    descargarJson(JSON.stringify(r.data),'mpconsultoria-respaldo-'+sello(r.now)+(liv?'-liviano':'')+'.json');
     marcarRespaldo(r.now);
     toast(r.falloIdb&&S.imports&&Object.keys(S.imports).length?'Respaldo descargado, pero sin los datos importados (el navegador no los dejó leer).':'Respaldo descargado: '+textoResumen(resumenDatos(r.data.datos)));
     renderMain();
@@ -2335,7 +2640,10 @@ function resumenDatos(d){
   return {emp:(d.empresas||[]).length,proy:c(ex.proyectos,function(a){return (a||[]).length}),dis:c(ex.disenos,function(e){return ((e&&e.list)||[]).length}),voz:Object.keys(d.voces||{}).length};
 }
 function textoResumen(r){return r.emp+' empresas, '+r.proy+' proyectos, '+r.dis+' diseños y '+r.voz+' voces'}
-function respaldoAviso(){
+function avisoNube(){return NUBE.nuevo?'<p class="hint" style="margin:0 0 12px;border-color:var(--acc)"><b style="color:var(--tx)">Hay datos más nuevos en la carpeta de la nube</b> (guardados desde otro equipo). Ve a Ajustes y pulsa <b>Cargar el más reciente</b>, luego <b>Combinar</b>, para no perder nada.</p>':''}
+function avisoArchivo(){return location.protocol==='file:'?'<p class="hint" style="margin:0 0 12px"><b style="color:var(--tx)">Estás abriendo la app desde un archivo del computador.</b> Chrome y Edge guardan los datos por separado y así no se puede instalar. Para no perder nada, conecta una carpeta de Drive en Ajustes o usa <b>Terminar y guardar</b>. Publicada en un enlace (Netlify o GitHub Pages) también funciona sin internet.</p>':''}
+function respaldoAviso(){return avisoNube()+avisoArchivo()+respaldoAviso0()}
+function respaldoAviso0(){
   var u=ultimoResp();
   if(!u)return '<p class="hint" style="margin:0 0 18px">Aún no has descargado un respaldo. Al terminar, pulsa <b>Terminar y guardar</b> en el menú.</p>';
   var h=(Date.now()-u.getTime())/36e5;
@@ -2344,11 +2652,10 @@ function respaldoAviso(){
 }
 function terminarDia(){
   toast('Guardando tu trabajo...');
-  construirRespaldo().then(function(r){
-    var json=JSON.stringify(r.data),cf=Promise.resolve(false);
-    if(NUBE.h)cf=permisoCarpeta(NUBE.h,true).then(function(ok){if(!ok)return false;return NUBE.h.getFileHandle(NUBE_ARCH,{create:true}).then(function(f){return f.createWritable()}).then(function(w){return w.write(json).then(function(){return w.close()})}).then(function(){return true})}).catch(function(){return false});
-    return cf.then(function(enCarpeta){
-      descargarJson(json,'mpconsultoria-respaldo-'+sello(r.now)+'.json');marcarRespaldo(r.now);NUBE.fecha=r.now;
+  var cf=NUBE.h?escribirCarpeta(true).then(function(o){return !!o},function(){return false}):Promise.resolve(false);
+  cf.then(function(enCarpeta){
+    return construirRespaldo().then(function(r){
+      descargarJson(JSON.stringify(r.data),'mpconsultoria-respaldo-'+sello(r.now)+'.json');marcarRespaldo(r.now);NUBE.fecha=NUBE.fecha||r.now;
       toast((enCarpeta?'Guardado en la carpeta y descargado. ':'Respaldo descargado. ')+textoResumen(resumenDatos(r.data.datos))+'. Ya puedes cerrar.');
       bloquear();
     });
@@ -2359,10 +2666,10 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
 document.addEventListener('change',function(ev){if(ev.target.hasAttribute&&ev.target.hasAttribute('data-resclaves')){try{localStorage.setItem('mpconsultoria_resclaves',ev.target.checked?'1':'0')}catch(e){}}});
 
 /* Carpeta en la nube (Drive / OneDrive sincronizados) */
-var NUBE={h:null,fecha:null},NUBE_ARCH='mpconsultoria-datos.json',NT=null;
+var NUBE={h:null,fecha:null,nuevo:false},NUBE_ARCH='mpconsultoria-datos.json',NT=null;
 function nubeAuto(){return localStorage.getItem('mpconsultoria_nauto')==='1'}
 function cargarNube(){
-  kvGet('carpeta').then(function(h){NUBE.h=h||null;if(h)return leerFechaCarpeta()}).catch(function(){});
+  kvGet('carpeta').then(function(h){NUBE.h=h||null;if(h)return leerFechaCarpeta()}).then(function(){if(NUBE.nuevo&&(route()==='inicio'||route()==='ajustes'))renderMain()}).catch(function(){});
 }
 function permisoCarpeta(h,pedir){
   if(!h.queryPermission)return Promise.resolve(true);
@@ -2370,32 +2677,49 @@ function permisoCarpeta(h,pedir){
 }
 function leerFechaCarpeta(){
   var h=NUBE.h;if(!h)return Promise.resolve();
-  return permisoCarpeta(h,false).then(function(ok){if(!ok)return;return h.getFileHandle(NUBE_ARCH).then(function(f){return f.getFile()}).then(function(f){NUBE.fecha=new Date(f.lastModified)})}).catch(function(){NUBE.fecha=null});
+  return permisoCarpeta(h,false).then(function(ok){if(!ok)return;return h.getFileHandle(NUBE_ARCH).then(function(f){return f.getFile()}).then(function(f){NUBE.fecha=new Date(f.lastModified);NUBE.nuevo=f.lastModified>modGuardado()+2000})}).catch(function(){NUBE.fecha=null});
 }
 function nubePanel(){
   var n=NUBE;
   return '<h2>Carpeta en la nube (Google Drive / OneDrive)</h2><div class="panel"><div class="pw" style="max-width:none;padding:12px 0"><p class="row-s" style="margin:0">Elige una carpeta que Google Drive u OneDrive ya sincronicen en tu PC. La app guarda ahí el archivo <b>'+NUBE_ARCH+'</b> (todo: empresas, voces, imágenes y módulos). En el portátil eliges la misma carpeta y cargas el más reciente. Funciona en Chrome y Edge.</p>'+
-   (n.h?'<p style="margin:0">Carpeta: <b>'+esc(n.h.name)+'</b>'+(n.fecha?' · archivo guardado el '+esc(fmtFecha(n.fecha)):' · aún sin archivo')+'</p>':'<p class="row-s" style="margin:0">Aún no hay carpeta elegida.</p>')+
+   (n.nuevo?'<p class="hint" style="margin:0;border-color:var(--acc)"><b style="color:var(--tx)">Hay un archivo más nuevo en la carpeta</b> (otro equipo guardó después de tu última sincronización). Pulsa <b>Cargar el más reciente</b> y elige <b>Combinar</b>.</p>':'')+(n.h?'<p style="margin:0">Carpeta: <b>'+esc(n.h.name)+'</b>'+(n.fecha?' · archivo guardado el '+esc(fmtFecha(n.fecha)):' · aún sin archivo')+'</p>':'<p class="row-s" style="margin:0">Aún no hay carpeta elegida.</p>')+
    '<div class="acts"><button class="btn pri" data-act="nelegir">'+(n.h?'Cambiar carpeta':'Elegir carpeta')+'</button>'+(n.h?'<button class="btn" data-act="nguardar">Guardar ahora</button><button class="btn" data-act="ncargar">Cargar el más reciente</button><button class="btn del" data-act="nquitar">Desconectar</button>':'')+'</div>'+
-   (n.h?'<label class="row" style="border:0"><input type="checkbox" data-nauto style="width:auto"'+(nubeAuto()?' checked':'')+'><span>Guardar solo 30 segundos después de cada cambio (cuando el navegador ya tenga permiso)</span></label>':'')+'</div></div>';
+   (n.h?'<label class="row" style="border:0"><input type="checkbox" data-nauto style="width:auto"'+(nubeAuto()?' checked':'')+'><span>Guardar solo 30 segundos después de cada cambio (cuando el navegador ya tenga permiso). Si otro equipo guardó antes, la app combina los dos y no sobrescribe.</span></label>':'')+'</div></div>';
+}
+function modGuardado(){try{return Number(localStorage.getItem('mpconsultoria_nmod'))||0}catch(e){return 0}}
+function setMod(t){try{localStorage.setItem('mpconsultoria_nmod',String(t))}catch(e){}}
+async function escribirCarpeta(manual){
+  var h=NUBE.h;if(!h)return false;
+  if(!(await permisoCarpeta(h,manual)))return false;
+  var comb=false,fh=null,ff=null;
+  try{fh=await h.getFileHandle(NUBE_ARCH);ff=await fh.getFile()}catch(e){ff=null}
+  if(ff&&ff.lastModified>modGuardado()+2000){
+    var d=null;try{d=JSON.parse(await ff.text())}catch(e){}
+    if(d&&validarRespaldo(d)){await combinarRespaldo(d);comb=true}
+    else if(manual){if(!confirm('El archivo de la carpeta no se pudo leer. ¿Sobrescribirlo con los datos de este equipo?'))return false}
+    else return false;
+  }
+  var r=await construirRespaldo(),fw=await h.getFileHandle(NUBE_ARCH,{create:true}),w=await fw.createWritable();
+  await w.write(JSON.stringify(r.data));await w.close();
+  var f2=await (await h.getFileHandle(NUBE_ARCH)).getFile();
+  setMod(f2.lastModified);NUBE.fecha=r.now;NUBE.nuevo=false;marcarRespaldo(r.now);
+  if(comb&&!manual){renderAll();toast('Otro equipo había guardado cambios: los combiné con los tuyos y guardé todo en la carpeta.')}
+  return comb?'comb':true;
 }
 function guardarCarpeta(manual){
-  var h=NUBE.h;if(!h)return;
-  permisoCarpeta(h,manual).then(function(ok){
-    if(!ok){if(manual)toast('Sin permiso para escribir en la carpeta.');return}
-    return construirRespaldo().then(function(r){
-      return h.getFileHandle(NUBE_ARCH,{create:true}).then(function(f){return f.createWritable()}).then(function(w){return w.write(JSON.stringify(r.data)).then(function(){return w.close()})}).then(function(){
-        marcarRespaldo(r.now);
-        NUBE.fecha=r.now;if(manual){toast('Guardado en la carpeta');if(route()==='ajustes')renderMain()}
-      });
-    });
-  }).catch(function(e){if(manual)toast('No se pudo guardar en la carpeta.')});
+  if(!NUBE.h)return;
+  escribirCarpeta(manual).then(function(ok){
+    if(!manual)return;
+    if(!ok)return toast('No se guardó en la carpeta (sin permiso o cancelado).');
+    toast(ok==='comb'?'Otro equipo había guardado cambios: los combiné con los tuyos y guardé todo.':'Guardado en la carpeta');
+    renderAll();
+  }).catch(function(){if(manual)toast('No se pudo guardar en la carpeta.')});
 }
 function cargarDesdeCarpeta(){
   var h=NUBE.h;if(!h)return;
   permisoCarpeta(h,true).then(function(ok){
     if(!ok)return toast('Sin permiso para leer la carpeta.');
-    return h.getFileHandle(NUBE_ARCH).then(function(f){return f.getFile()}).then(function(f){restaurar(f)},function(){toast('En esa carpeta todavía no hay un archivo '+NUBE_ARCH+'. Primero usa "Guardar ahora" en el otro equipo.')});
+    return h.getFileHandle(NUBE_ARCH).then(function(f){return f.getFile()}).then(function(f){RMOD=f.lastModified;restaurar(f)},function(){toast('En esa carpeta todavía no hay un archivo '+NUBE_ARCH+'. Primero usa "Guardar ahora" en el otro equipo.')});
   }).catch(function(){toast('No se pudo leer la carpeta.')});
 }
 document.addEventListener('change',function(ev){if(ev.target.hasAttribute&&ev.target.hasAttribute('data-nauto')){try{localStorage.setItem('mpconsultoria_nauto',ev.target.checked?'1':'0')}catch(e){}}});
@@ -2437,13 +2761,80 @@ function leerRespaldo(file,fnOk,fnErr){
   };
   rd.readAsText(file);
 }
-function restaurar(file){
+function restaurar(file){elegirRestauro(file)}
+function restaurarSolo(file){
   leerRespaldo(file,function(d){
     var f=d.fecha?new Date(d.fecha):null,ft=f&&!isNaN(f)?' del '+fmtFecha(f):'',rs=resumenDatos(d.datos);
-    if(!confirm('Vas a reemplazar los datos de este equipo ('+S.empresas.length+' empresas) por los del respaldo'+ft+': '+textoResumen(rs)+'. ¿Continuar?'))return;
+    if(!confirm('Vas a reemplazar los datos de este equipo ('+S.empresas.length+' empresas) por los del respaldo'+ft+': '+textoResumen(rs)+(d.liviano?' (respaldo liviano: no trae audios ni imágenes; los que ya tengas en este equipo se conservan)':'')+'. ¿Continuar?'))return;
     toast('Restaurando...');
     aplicarRespaldo(d,{}).then(function(r){renderAll();toast(r.ok?'Respaldo restaurado: '+textoResumen(r)+(r.gk?'. La clave de Gemini venía incluida.':''):'Se restauró lo principal, pero algo no se pudo guardar. Revisa el espacio del navegador.')});
   },function(m){toast(m)});
+}
+/* Combinar los datos de dos equipos sin perder nada */
+var RPEND=null,RMOD=0;
+function esObj(x){return Object.prototype.toString.call(x)==='[object Object]'}
+function fusionar(a,b){
+  if(Array.isArray(a)&&Array.isArray(b)){
+    var out=a.slice(),pos={},vis={};
+    a.forEach(function(x,i){if(esObj(x)&&x.id!=null)pos[x.id]=i;try{vis[JSON.stringify(x)]=1}catch(e){}});
+    b.forEach(function(x){
+      if(esObj(x)&&x.id!=null){if(pos[x.id]==null){pos[x.id]=out.length;out.push(x)}else out[pos[x.id]]=fusionar(out[pos[x.id]],x)}
+      else{var k=null;try{k=JSON.stringify(x)}catch(e){}if(k==null||!vis[k]){out.push(x);if(k!=null)vis[k]=1}}
+    });
+    return out;
+  }
+  if(esObj(a)&&esObj(b)){var o={};Object.keys(a).forEach(function(k){o[k]=a[k]});Object.keys(b).forEach(function(k){o[k]=(k in o)?fusionar(o[k],b[k]):b[k]});return o}
+  if(a==null||a==='')return b==null?a:b;
+  return a;
+}
+function remapIds(x,m){
+  if(typeof x==='string')return Object.prototype.hasOwnProperty.call(m,x)?m[x]:x;
+  if(Array.isArray(x))return x.map(function(y){return remapIds(y,m)});
+  if(esObj(x)){var o={};Object.keys(x).forEach(function(k){o[Object.prototype.hasOwnProperty.call(m,k)?m[k]:k]=remapIds(x[k],m)});return o}
+  return x;
+}
+function combinarRespaldo(d){
+  var dd=d.datos,idm={},nuevas=0,pn={};
+  S.empresas.forEach(function(e){pn[norm(e.nombre)]=e});
+  (dd.empresas||[]).forEach(function(x){
+    if(!x||typeof x!=='object'||typeof x.nombre!=='string'||!x.nombre.trim())return;
+    var inc=limpiarEmpresa(x),loc=S.empresas.filter(function(e){return e.id===x.id})[0]||pn[norm(x.nombre)];
+    if(loc){idm[x.id]=loc.id;Object.keys(inc).forEach(function(k){if(k==='id'||k==='creada')return;if((loc[k]===''||loc[k]==null)&&inc[k])loc[k]=inc[k]})}
+    else{if(S.empresas.some(function(e){return e.id===inc.id}))inc.id=uid();idm[x.id]=inc.id;S.empresas.push(inc);pn[norm(inc.nombre)]=inc;nuevas++}
+  });
+  var ex=esObj(dd.extra)?remapIds(dd.extra,idm):{};
+  Object.keys(ex).forEach(function(k){if(['empresas','activa','imports','informe'].indexOf(k)>=0)return;S[k]=(k in S)?fusionar(S[k],ex[k]):ex[k]});
+  if(esObj(dd.imports))S.imports=fusionar(S.imports||{},dd.imports);
+  var p=Promise.resolve(),pre={legacy:'legacy:',voces:'voz:',imgs:'img:'};
+  Object.keys(pre).forEach(function(g){
+    var o=dd[g];if(!esObj(o))return;
+    Object.keys(o).forEach(function(k){p=p.then(function(){return kvGet(pre[g]+k)}).then(function(cur){
+      if(cur==null)return kvSet(pre[g]+k,g==='legacy'?remapIds(o[k],idm):o[k]);
+      if(g==='legacy'&&esObj(cur)&&esObj(o[k]))return kvSet(pre[g]+k,fusionar(cur,remapIds(o[k],idm)));
+    })});
+  });
+  var gm=dd.gemini;if(gm&&gm.k&&!gk().k){try{localStorage.setItem(GKEY,JSON.stringify(gm))}catch(e){}}
+  return p.then(function(){return true},function(){return false}).then(function(ok){save();var r=resumenDatos({empresas:S.empresas,extra:S,voces:dd.voces});r.ok=ok;r.nuevas=nuevas;return r});
+}
+function elegirRestauro(file){
+  leerRespaldo(file,function(d){
+    RPEND=d;
+    var f=d.fecha?new Date(d.fecha):null,ft=f&&!isNaN(f)?fmtFecha(f):'fecha desconocida';
+    abrirD2('Cargar datos de otro equipo','<p class="row-s">Archivo del '+esc(ft)+': <b>'+esc(textoResumen(resumenDatos(d.datos)))+'</b>.<br>Este equipo tiene: <b>'+esc(textoResumen(resumenDatos({empresas:S.empresas,extra:S,voces:{}})))+'</b>.</p><div class="pre"><b>Combinar (recomendado):</b> suma lo que le falta a cada lado y no borra nada. Las empresas se unen por nombre.<br><br><b>Reemplazar:</b> este equipo queda igual al archivo. Lo que solo exista aquí se pierde.'+(d.liviano?'<br><br>Es un respaldo liviano: no trae audios ni imágenes; los de este equipo se conservan.':'')+'</div><div class="acts"><button class="btn pri" data-act="rcomb">Combinar</button><button class="btn del" data-act="rrepl">Reemplazar</button><button class="btn" data-act="cerrar2">Cancelar</button></div>');
+  },function(m){toast(m)});
+}
+function terminarRestauro(modo){
+  var d=RPEND,desdeCarpeta=RMOD>0,mod=RMOD;RPEND=null;RMOD=0;
+  try{$('#dlg2').close()}catch(e){}
+  if(!d)return;
+  toast(modo==='comb'?'Combinando...':'Restaurando...');
+  var pr=modo==='comb'?combinarRespaldo(d):aplicarRespaldo(d,{});
+  pr.then(function(r){
+    renderAll();
+    if(desdeCarpeta){setMod(mod);NUBE.nuevo=false}
+    toast(modo==='comb'?'Listo, combiné los dos equipos: '+textoResumen(r)+(r.nuevas?' ('+r.nuevas+' empresa(s) nueva(s))':'')+'.':(r.ok?'Respaldo restaurado: '+textoResumen(r)+(r.gk?'. La clave de Gemini venía incluida.':''):'Se restauró lo principal, pero algo no se pudo guardar. Revisa el espacio del navegador.'));
+    if(modo==='comb'&&NUBE.h&&desdeCarpeta)guardarCarpeta(false);
+  });
 }
 function restaurarBloqueado(file){
   leerRespaldo(file,function(d){
@@ -2457,7 +2848,7 @@ document.addEventListener('change',function(ev){
   var id=ev.target.id,fs=ev.target.files;
   if(ev.target.getAttribute&&ev.target.getAttribute('data-dt')){var tid=ev.target.getAttribute('data-dt'),vv=ev.target.value;guardarDiag(function(o){o.tareas.forEach(function(t){if(String(t.id)===tid)t.estado=vv})});return}
   if(ev.target.getAttribute&&ev.target.getAttribute('data-pest')){S.estPub=S.estPub||{};S.estPub[ev.target.getAttribute('data-pest')]=ev.target.value;save();pintarPL();return}
-  if(id==='rf'){var f=fs&&fs[0];ev.target.value='';if(f)restaurar(f)}
+  if(id==='rf'){var f=fs&&fs[0];ev.target.value='';if(f){RMOD=0;restaurar(f)}}
   else if(id==='imf'){var l=fs?Array.prototype.slice.call(fs):[];ev.target.value='';if(l.length)importarArchivos(l)}
 });
 

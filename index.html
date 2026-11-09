@@ -1091,12 +1091,12 @@ function dibujar(c,sl,i,n,a,W,H){
   var ts=sl.ts,bs=Math.round(ts*0.42);
   x.textBaseline='top';x.font='700 '+ts+'px '+F;var tl=envolver(x,sl.t,mw);
   x.font='500 '+bs+'px '+F;var bl=sl.b?envolver(x,sl.b,mw):[];
-  var th=tl.length*ts*1.12,bh=bl.length*bs*1.4,ch=sl.cta?110:0,tot=th+(bl.length?30:0)+bh+(ch?40:0)+ch,y=(H-tot)/2;
+  x.font='700 38px '+F;var cl=sl.cta?envolver(x,sl.cta,mw-90):[],th=tl.length*ts*1.12,bh=bl.length*bs*1.4,ch=sl.cta?cl.length*48+62:0,tot=th+(bl.length?30:0)+bh+(ch?40:0)+ch,y=(H-tot)/2;
   if(sl.pn&&sl.img){var dkp=(function(h){var n2=parseInt(String(h).slice(1),16);return (0.299*(n2>>16)+0.587*((n2>>8)&255)+0.114*(n2&255))/255<0.5})(sl.tc);x.fillStyle=dkp?'rgba(255,255,255,.66)':'rgba(0,0,0,.44)';rr(x,P*0.55,y-P*0.4,W-P*1.1,tot+P*0.8,P*0.5);x.fill()}
   x.textAlign='center';x.fillStyle=sl.tc;
   x.font='700 '+ts+'px '+F;tl.forEach(function(l){x.fillText(l,W/2,y);y+=ts*1.12});
   if(bl.length){y+=30;x.globalAlpha=0.92;x.font='500 '+bs+'px '+F;bl.forEach(function(l){x.fillText(l,W/2,y);y+=bs*1.4});x.globalAlpha=1}
-  if(ch){y+=40;x.font='700 38px '+F;var bw=x.measureText(sl.cta).width+90;x.fillStyle='#ffd166';rr(x,W/2-bw/2,y,bw,ch-10,50);x.fill();x.fillStyle='#1b1140';x.textBaseline='middle';x.fillText(sl.cta,W/2,y+(ch-10)/2)}
+  if(ch){y+=40;x.font='700 38px '+F;var bw=Math.min(mw,Math.max.apply(null,cl.map(function(q){return x.measureText(q).width}))+90);x.fillStyle='#ffd166';rr(x,W/2-bw/2,y,bw,ch-10,cl.length>1?36:50);x.fill();x.fillStyle='#1b1140';x.textBaseline='middle';cl.forEach(function(q,j){x.fillText(q,W/2,y+31+j*48)})}
   x.textBaseline='middle';x.fillStyle=sl.tc;x.globalAlpha=0.85;x.font='500 30px '+F;
   x.textAlign='left';x.fillText(a.instagram||'',P,H-P);x.textAlign='right';x.fillText((i+1)+'/'+n+' →',W-P,H-P);x.globalAlpha=1;
 }
@@ -1429,6 +1429,7 @@ function aplicarMarca(){
   var ap=S.app||{},m=$('#bMark'),n=$('#bName');if(!m||!n)return;
   aplicarFondoApp();
   n.textContent=ap.nombre||'MPCONSULTORIA';document.title=ap.nombre||'MPCONSULTORIA';
+  try{var fi=document.querySelector('link[rel="icon"]');if(fi){if(!fi.dataset.orig)fi.dataset.orig=fi.getAttribute('href');fi.setAttribute('href',ap.logo||fi.dataset.orig)}}catch(e){}
   if(ap.logo){m.innerHTML='<img src="'+ap.logo+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">';m.style.background='transparent'}
   else{m.textContent=(ap.nombre||'MP').trim().slice(0,2).toUpperCase();m.style.background=''}
 }
@@ -2342,7 +2343,8 @@ function hashPw(pw,salt,algo){
 function lerr(m){var e=$('#lkErr');if(e)e.textContent=m}
 function showLock(mode,msg){
   var L=$('#lock'),setup=mode==='setup';
-  L.innerHTML='<div class="lock-box"><div class="brand-mark">MP</div>'+
+  var lg0='';try{lg0=((JSON.parse(localStorage.getItem('mpconsultoria_v1'))||{}).app||{}).logo||''}catch(e){}
+  L.innerHTML='<div class="lock-box"><div class="brand-mark"'+(lg0?' style="background:transparent;padding:0;overflow:hidden"':'')+'>'+(lg0?'<img src="'+lg0+'" alt="" style="width:100%;height:100%;object-fit:cover">':'MP')+'</div>'+
    '<h1>'+(setup?'Crea tu clave de acceso':'MPCONSULTORIA')+'</h1>'+
    '<p class="sub">'+(setup?'Esta clave protege la plataforma en este navegador. Guárdala bien.':'Escribe tu clave para entrar.')+'</p>'+
    (msg?'<p class="sub" style="color:var(--ok)">'+esc(msg)+'</p>':'')+

@@ -102,6 +102,7 @@ button{cursor:pointer}
 .hl{background:rgba(245,184,61,.2);color:var(--acc-t);padding:0 4px;border-radius:6px}.hl2{background:rgba(62,207,158,.18);color:var(--ok)}
 .sg-h{background:rgba(245,184,61,.18);color:var(--acc-t);border-radius:6px;padding:0 3px}.sg-c{background:rgba(62,207,158,.16);color:var(--ok);border-radius:6px;padding:0 3px}.sg-a{color:var(--mut);font-size:.88em}
 .rtog{cursor:pointer;border:1px solid var(--line);background:var(--surf);color:var(--mut);font-size:12px;border-radius:20px;padding:3px 10px}.rtog.on{background:rgba(245,184,61,.18);color:var(--acc-t);border-color:var(--acc);font-weight:700}
+.fs{border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:8px 12px}.fs legend{padding:0 6px;font-weight:700;color:var(--acc-t)}
 .insight{border-left:3px solid var(--acc);padding:8px 12px;background:var(--surf2);border-radius:8px;margin:6px 0}.insight.ok{border-color:var(--ok)}.insight.mal{border-color:var(--bad)}
 .pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;margin:4px 0 10px}
 .vb{display:block!important}
@@ -271,7 +272,7 @@ function seed(){
   return {empresas:em,activa:em[0].id};
 }
 function blank(o){
-  var e={id:uid(),nombre:'',tipo:'Otro',ciudad:'',logo:'',color:'#f5b83d',productos:'',diferenciales:'',publico:'',tono:'Cercano',objetivo:'Vender más',facebook:'',instagram:'',tiktok:'',whatsapp:'',notas:'',creada:Date.now()};
+  var e={id:uid(),nombre:'',tipo:'Otro',ciudad:'',logo:'',color:'#f5b83d',productos:'',diferenciales:'',publico:'',tono:'Cercano',objetivo:'Vender más',facebook:'',instagram:'',tiktok:'',youtube:'',whatsapp:'',notas:'',creada:Date.now()};
   for(var k in o){e[k]=o[k]}
   return e;
 }
@@ -347,7 +348,7 @@ function vEmpresas(){
   var lista=S.empresas.filter(function(e){var q=filtro.toLowerCase();return !q||(e.nombre+' '+e.tipo+' '+e.ciudad).toLowerCase().indexOf(q)>=0});
   var cards=lista.map(function(e){
     var p=pct(e),isA=a&&a.id===e.id;
-    var redes=['facebook','instagram','tiktok','whatsapp'].filter(function(k){return e[k]}).map(function(k){return '<span class="chip">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'}).join('');
+    var redes=['facebook','instagram','tiktok','youtube','whatsapp'].filter(function(k){return e[k]}).map(function(k){return '<span class="chip">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'}).join('');
     return '<article class="card'+(isA?' act':'')+'"><div class="card-h">'+av(e,'lg')+'<div class="row-main"><div class="row-t">'+esc(e.nombre)+'</div><div class="row-s">'+esc(e.tipo)+(e.ciudad?' &middot; '+esc(e.ciudad):'')+'</div>'+(isA?'<span class="badge">Activa</span>':'')+'</div></div>'+
       '<div><div class="row-s">Ficha '+p+'% completa</div><div class="bar" style="max-width:none"><i style="width:'+p+'%"></i></div></div>'+
       (redes?'<div class="chips">'+redes+'</div>':'')+
@@ -428,7 +429,7 @@ function openForm(id){
    '<div class="f"><label for="f_obj">Objetivo principal</label><select id="f_obj" name="objetivo">'+opts(['Vender más','Ganar seguidores','Dar a conocer la marca','Fidelizar clientes'],e.objetivo)+'</select></div>'+'<div class="f"><label for="f_nic">Tipo de servicio (para guiones y comparativo)</label><select id="f_nic" name="nicho"><option value="">Automático según la ficha</option>'+Object.keys(NICHOS).map(function(k){return '<option value="'+k+'"'+(e.nicho===k?' selected':'')+'>'+NICHOS[k]+'</option>'}).join('')+'</select></div>'+'<div class="f"><label for="f_reg">Región y acento</label><select id="f_reg" name="region"><option value="">Automática según la ciudad</option>'+Object.keys(REG).map(function(k){return '<option value="'+k+'"'+(e.region===k?' selected':'')+'>'+REG[k].n+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label for="f_fb">Facebook</label><input type="text" id="f_fb" name="facebook" placeholder="Enlace o usuario" value="'+esc(e.facebook)+'"></div>'+
    '<div class="f"><label for="f_ig">Instagram</label><input type="text" id="f_ig" name="instagram" placeholder="@usuario" value="'+esc(e.instagram)+'"></div>'+
-   '<div class="f"><label for="f_tt">TikTok</label><input type="text" id="f_tt" name="tiktok" placeholder="@usuario" value="'+esc(e.tiktok)+'"></div>'+
+   '<div class="f"><label for="f_tt">TikTok</label><input type="text" id="f_tt" name="tiktok" placeholder="@usuario" value="'+esc(e.tiktok)+'"></div>'+'<div class="f"><label for="f_yt">YouTube</label><input type="text" id="f_yt" name="youtube" placeholder="@canal o enlace" value="'+esc(e.youtube||'')+'"></div>'+
    '<div class="f"><label for="f_wa">WhatsApp</label><input type="text" id="f_wa" name="whatsapp" placeholder="Ej: 3001234567" value="'+esc(e.whatsapp)+'"></div>'+
    '<div class="f w"><label for="f_notas">Notas</label><textarea id="f_notas" name="notas">'+esc(e.notas)+'</textarea></div>';
   $('#logoFile').addEventListener('change',onLogo);
@@ -595,6 +596,8 @@ document.addEventListener('click',function(ev){
   else if(act==='cptab'){CP.tab=id;renderMain()}
   else if(act==='cpmet'){CP.met=id;renderMain()}
   else if(act==='cpinforme')informeComp();
+  else if(act==='cppm'){CP.pm=id;renderMain()}
+  else if(act==='esia'){var a9=activa(),ix9=ESD?ESD.map(function(x){return x.month}).indexOf(EST.mes):-1;if(ix9<0)return toast('Registra un mes primero.');toast('Pidiendo el plan a Gemini...');llamarGemini(promptEstrategia(a9,ESD.slice(Math.max(0,ix9-2),ix9+1),ESD[ix9])).then(function(t){S.estrat=S.estrat||{};(S.estrat[a9.id]=S.estrat[a9.id]||{})[EST.mes]=String(t).trim();save();pintarES();toast('Plan listo')},function(e){toast(e.message||'No se pudo pedir el plan.')})}
   else if(act==='repprint')window.print();
   else if(act==='repclose')cerrarInforme();
   else if(act==='iconosapp')bajarIconos();
@@ -897,10 +900,10 @@ document.addEventListener('submit',function(ev){
   $('#dlg2').close();toast('Tarea agregada');
 });
 /* Módulo Comparativo (reorganizado: resumen del mes, frente al sector y plataformas) */
-var CP={mes:'',tab:'mes',met:'seg'},CPD=null,COLC=['#f5b83d','#22d3ee','#ff6fa5','#a3e635','#a78bfa','#fb923c','#60a5fa','#34d399'];
+var CP={mes:'',tab:'mes',met:'seg',pm:'fol'},CPD=null,COLC=['#f5b83d','#22d3ee','#ff6fa5','#a3e635','#a78bfa','#fb923c','#60a5fa','#34d399'];
 function vComp(){
   return '<header class="ph"><div><h1>Comparativo</h1><p class="sub" id="cpSub">Resultados de todas tus empresas'+(CP.mes?' en '+esc(nombreMes(CP.mes)):'')+'.</p></div><div class="tools" style="margin:0"><select id="cpMes" style="width:auto" aria-label="Mes"></select><button class="btn" data-act="cexport">Excel (CSV)</button><button class="btn pri" data-act="cpinforme">Informe con gráficas</button></div></header>'+
-   '<div class="tabs" style="flex-wrap:wrap">'+[['mes','Resumen del mes'],['lect','Lectura rápida'],['sector','Frente al sector'],['plat','Plataformas'],['grp','Tipo y región'],['evo','Evolución']].map(function(t){return '<button data-act="cptab" data-id="'+t[0]+'" class="'+(CP.tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div><div id="cpBody"><p class="sub">Cargando...</p></div>';
+   '<div class="tabs" style="flex-wrap:wrap">'+[['mes','Resumen del mes'],['lect','Lectura rápida'],['sector','Frente al sector'],['sim','Frente a similares'],['plat','Plataformas'],['grp','Tipo y región'],['evo','Evolución']].map(function(t){return '<button data-act="cptab" data-id="'+t[0]+'" class="'+(CP.tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</div><div id="cpBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarCP(){
   Promise.all([kvGet('legacy:hmpi'),kvGet('legacy:nadine')]).catch(function(){return [null,null]}).then(function(r){
@@ -925,7 +928,7 @@ function datosMes(f,m){
   var ms=f.st.map(function(x){return x.month}),i=ms.indexOf(m);
   if(i<0)return null;
   var cur=f.st[i],prev=i>0?f.st[i-1]:null,seg=segTot(cur),ps=prev?segTot(prev):0,ing=Number(cur.income)||0,pi=prev?(Number(prev.income)||0):0;
-  return {seg:seg,crec:ps?(seg-ps)/ps*100:null,alc:Number(cur.reach)||0,inter:Number(cur.interactions)||0,tasa:cur.reach?cur.interactions/cur.reach*100:null,ventas:Number(cur.sales)||0,ing:ing,vari:pi?(ing-pi)/pi*100:null,pub:f.pubs.filter(function(x){return (x.fecha||'').indexOf(m)===0&&x.estado==='publicado'}).length,fol:cur.followers||{}};
+  return {seg:seg,crec:ps?(seg-ps)/ps*100:null,alc:Number(cur.reach)||0,inter:Number(cur.interactions)||0,tasa:cur.reach?cur.interactions/cur.reach*100:null,ventas:Number(cur.sales)||0,ing:ing,vari:pi?(ing-pi)/pi*100:null,pub:f.pubs.filter(function(x){return (x.fecha||'').indexOf(m)===0&&x.estado==='publicado'}).length,fol:cur.followers||{},pl:cur.plat||{},leads:Number(cur.leads)||0,nota:cur.nota||''};
 }
 function pct1(v){return v==null?'-':(v>=0?'+':'')+v.toFixed(1)+'%'}
 function colPct(v){return v==null?'':'color:'+(v>=0?'var(--ok)':'var(--bad)')}
@@ -959,17 +962,13 @@ function pintarCP(){
     b.innerHTML='<section class="kpi">'+tj+'</section><h2>Resumen del mes</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Seguidores</th><th>Crecimiento</th><th>Alcance</th><th>Interacciones</th><th>Tasa de interacción</th><th>Ventas</th><th>Ingresos</th><th>Var. ingresos</th><th>Publicados</th></tr>'+
      D.map(function(x){var d=x.d;return '<tr><td>'+esc(x.f.e.nombre)+'</td>'+(d?'<td>'+n(d.seg)+'</td><td style="'+colPct(d.crec)+'">'+pct1(d.crec)+'</td><td>'+n(d.alc)+'</td><td>'+n(d.inter)+'</td><td>'+(d.tasa==null?'-':d.tasa.toFixed(1)+'%')+'</td><td>'+n(d.ventas)+'</td><td>$'+n(d.ing)+'</td><td style="'+colPct(d.vari)+'">'+pct1(d.vari)+'</td><td>'+d.pub+'</td>':'<td colspan="9" class="row-s" style="text-align:left">Sin estadísticas de este mes. Regístralas en Estadísticas.</td>')+'</tr>'}).join('')+'</table></div>'+
      '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))"><div><h2>Crecimiento acumulado de seguidores</h2><div class="panel" style="padding:12px 16px">'+lineaSeg()+'</div></div><div><h2>Ingresos del mes</h2><div class="panel">'+D.map(function(x){var v=x.d?x.d.ing:0;return '<div class="row"><div style="width:130px" class="row-t">'+esc(x.f.e.nombre)+'</div><div class="row-main"><div class="bar" style="max-width:none;height:10px"><i style="width:'+Math.round(v/maxI*100)+'%;background:'+x.f.col+'"></i></div></div><span class="row-s" style="width:80px;text-align:right">$'+v.toLocaleString('es-CO')+'</span></div>'}).join('')+'</div></div></div>';
-  }else if(CP.tab==='lect'){cpLectura(b,D)}else if(CP.tab==='grp'){cpGrupos(b,D)}else if(CP.tab==='evo'){cpEvolucion(b)}else if(CP.tab==='sector'){
+  }else if(CP.tab==='sim'){cpSim(b,D)}else if(CP.tab==='lect'){cpLectura(b,D)}else if(CP.tab==='grp'){cpGrupos(b,D)}else if(CP.tab==='evo'){cpEvolucion(b)}else if(CP.tab==='sector'){
     b.innerHTML='<p class="sub" style="margin:0 0 10px">Cada indicador de la empresa frente al promedio de su sector.</p><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th><th>Sector</th><th>Interacción</th><th>Publicaciones/sem</th><th>Resp. WhatsApp (min)</th><th>Contactos/mes</th><th>Sobre el sector</th></tr>'+
      D.map(function(x){var f=x.f,o=f.o,bb=f.b;if(!f.tiene)return '<tr><td>'+esc(f.e.nombre)+'</td><td colspan="6" class="row-s" style="text-align:left">Sin datos de diagnóstico. Ingrésalos en Diagnóstico y estrategia.</td></tr>';
       var ok=(o.int>=bb.int)+(o.pub>=bb.pub)+(o.resp<=bb.resp)+(o.leads>=bb.leads);
       return '<tr><td>'+esc(f.e.nombre)+'</td><td>'+esc(f.o.sector)+'</td><td>'+o.int+'% '+tendencia(o.int,bb.int)+'</td><td>'+o.pub+' '+tendencia(o.pub,bb.pub)+'</td><td>'+o.resp+' '+tendencia(o.resp,bb.resp,true)+'</td><td>'+o.leads+' '+tendencia(o.leads,bb.leads)+'</td><td><b>'+ok+' de 4</b></td></tr>'}).join('')+'</table></div>';
   }else{
-    var PL2=['Instagram','TikTok','Facebook','YouTube'];
-    b.innerHTML='<div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Empresa</th>'+PL2.map(function(p2){return '<th>'+p2+'</th>'}).join('')+'<th>Total</th><th>Red principal</th></tr>'+
-     D.map(function(x){var d=x.d;if(!d)return '<tr><td>'+esc(x.f.e.nombre)+'</td><td colspan="6" class="row-s" style="text-align:left">Sin estadísticas de este mes.</td></tr>';
-      var top=PL2.slice().sort(function(a1,b1){return (Number(d.fol[b1])||0)-(Number(d.fol[a1])||0)})[0];
-      return '<tr><td>'+esc(x.f.e.nombre)+'</td>'+PL2.map(function(p2){var v=Number(d.fol[p2])||0;return '<td>'+v.toLocaleString('es-CO')+(d.seg?' <span class="row-s">('+Math.round(v/d.seg*100)+'%)</span>':'')+'</td>'}).join('')+'<td><b>'+d.seg.toLocaleString('es-CO')+'</b></td><td>'+((Number(d.fol[top])||0)?top:'-')+'</td></tr>'}).join('')+'</table></div>';
+    cpPlat(b,D);
   }
   b.insertAdjacentHTML('afterbegin',cpAviso(D));
 }
@@ -1026,8 +1025,10 @@ function informeComp(){
    '<section><h2>Ingresos del mes</h2>'+barras('ing',function(v){return '$'+num(v)})+'</section>'+
    '<section><h2>Evolución de seguidores</h2>'+svgLineas(serie(segTot),ml,function(v){return nCorto(v)})+'</section>'+
    '<section><h2>Evolución de ingresos</h2>'+svgLineas(serie(function(q){return Number(q.income)||0}),ml,function(v){return nCorto(v,'$')})+'</section>'+
+   '<section><h2>Por plataforma: seguidores</h2><div style="overflow-x:auto">'+cpPlatTabla(D,'fol')+'</div><h2>Por plataforma: tasa de interacción</h2><div style="overflow-x:auto">'+cpPlatTabla(D,'tasa')+'</div></section>'+
    '<section><h2>Resumen del mes</h2><div style="overflow-x:auto">'+tabla+'</div></section>'+
    '<section><h2>Frente al sector</h2>'+tsec+'</section>'+
+   '<section><h2>Frente a negocios similares</h2><div style="overflow-x:auto">'+cpSimTabla(D)+'</div><p class="row-s">Entre paréntesis, el promedio de los similares (tu cartera del mismo tipo y las referencias agregadas). Verde: igual o mejor; rojo: por debajo.</p></section>'+
    '<section><h2>Por tipo de servicio y región</h2>'+cpGruposHtml(D)+'</section>'+
    '<section><h2>Lectura rápida y qué hacer</h2>'+(ins.length?ins.map(function(i){return '<div class="insight '+i[0]+'">'+i[1]+'</div>'}).join(''):'<p class="row-s">Aún no hay suficientes datos para sacar conclusiones.</p>')+'</section>'+
    '<footer>Informe generado con '+esc(ap.nombre||'MPCONSULTORIA')+'. Las cifras salen de las estadísticas registradas por empresa.</footer></div>';
@@ -1035,6 +1036,30 @@ function informeComp(){
   ov.innerHTML=h;ov.hidden=false;ov.scrollTop=0;document.body.classList.add('repmode');
 }
 function cerrarInforme(){var ov=$('#repOv');if(ov){ov.hidden=true;ov.innerHTML=''}document.body.classList.remove('repmode')}
+var CP_PM={fol:['Seguidores',function(d,k){return Number(d.fol[k])||0}],reach:['Alcance',function(d,k){return ((d.pl||{})[k]||{}).reach||0}],inter:['Interacciones',function(d,k){return ((d.pl||{})[k]||{}).inter||0}],tasa:['Tasa de interacción',function(d,k){return tasaPl((d.pl||{})[k])}],posts:['Publicaciones',function(d,k){return ((d.pl||{})[k]||{}).posts||0}],vis:['Visitas o clics',function(d,k){return ((d.pl||{})[k]||{}).visits||0}]};
+function cpPlatTabla(D,pm){
+  var M=CP_PM[pm]||CP_PM.fol,fm=function(v){return v==null?'-':pm==='tasa'?v.toFixed(1)+'%':v.toLocaleString('es-CO')};
+  return '<table class="tbl"><tr><th>Empresa</th>'+PLATS.map(function(k){return '<th>'+k+'</th>'}).join('')+'<th>Mejor red</th></tr>'+D.map(function(x){
+    var d=x.d;if(!d)return '<tr><td>'+esc(x.f.e.nombre)+'</td><td colspan="'+(PLATS.length+1)+'" class="row-s" style="text-align:left">Sin estadísticas de este mes.</td></tr>';
+    var vs=PLATS.map(function(k){return M[1](d,k)}),mx=0,bi=-1;vs.forEach(function(v,i){if(v!=null&&v>mx){mx=v;bi=i}});
+    return '<tr><td>'+esc(x.f.e.nombre)+'</td>'+vs.map(function(v,i){return '<td'+(i===bi?' style="font-weight:700;color:var(--ok)"':'')+'>'+fm(v)+'</td>'}).join('')+'<td>'+(bi>=0?PLATS[bi]:'-')+'</td></tr>';
+  }).join('')+'</table>';
+}
+function cpPlat(b,D){
+  b.innerHTML='<div class="tabs" style="flex-wrap:wrap">'+Object.keys(CP_PM).map(function(k){return '<button data-act="cppm" data-id="'+k+'" class="'+(CP.pm===k?'on':'')+'">'+CP_PM[k][0]+'</button>'}).join('')+'</div><div class="panel" style="overflow-x:auto">'+cpPlatTabla(D,CP.pm)+'</div><p class="row-s">En verde, la red que más rinde en cada empresa. Registra los datos por red en Estadísticas, botón Registrar mes.</p>';
+}
+function cpSimTabla(D){
+  var rows=D.map(function(x){
+    var e=x.f.e,R=simResumen(e,CP.mes,mesDeEmp(e,CP.mes)),V=simVeredicto(R);
+    if(!R.filas.length)return '<tr><td>'+esc(e.nombre)+'</td><td colspan="6" class="row-s" style="text-align:left">Sin similares. Agrégalos en Estadísticas o en Diagnóstico y estrategia.</td></tr>';
+    var cel=function(k){var i=V.items.filter(function(q){return q.k===k})[0],m=SIM_M.filter(function(q){return q[0]===k})[0];if(!i)return '<td class="row-s">-</td>';return '<td><b style="color:'+(i.mejor?'var(--ok)':'var(--bad)')+'">'+fmtSim(i.y,i.u,k)+'</b> <span class="row-s">(sim. '+fmtSim(i.p,i.u,k)+')</span></td>'};
+    return '<tr><td>'+esc(e.nombre)+'</td><td>'+R.filas.length+'</td>'+cel('int')+cel('pub')+cel('resp')+cel('leads')+'<td><b>'+V.ok+' de '+V.tot+'</b></td></tr>';
+  }).join('');
+  return '<table class="tbl"><tr><th>Empresa</th><th>Similares</th><th>Interacción</th><th>Pub./sem</th><th>Resp. (min)</th><th>Contactos</th><th>Mejor que similares</th></tr>'+rows+'</table>';
+}
+function cpSim(b,D){
+  b.innerHTML='<p class="sub" style="margin:0 0 10px">Cada empresa frente al promedio de negocios similares: tu cartera del mismo tipo y las referencias que agregaste. Entre paréntesis, el promedio de los similares.</p><div class="panel" style="overflow-x:auto">'+cpSimTabla(D)+'</div><p class="row-s">Verde: igual o mejor que los similares. Rojo: por debajo (en respuesta de WhatsApp, menos minutos es mejor).</p>';
+}
 function cpAviso(D){
   var con=D.filter(function(x){return x.d}).length,n=D.length;
   if(con===n)return '';
@@ -1101,7 +1126,7 @@ function csvComp(){
   if(!CPD)return;
   var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'},rows,D=CPD.filas.map(function(f){return {f:f,d:datosMes(f,CP.mes)}});
   if(CP.tab==='evo')rows=cpEvoRows();else if(CP.tab==='sector')rows=[['Empresa','Sector','Interacción %','Publicaciones por semana','Respuesta WhatsApp (min)','Contactos al mes','Indicadores sobre el sector']].concat(D.map(function(x){var o=x.f.o,bb=x.f.b;return [x.f.e.nombre,o.sector,o.int,o.pub,o.resp,o.leads,x.f.tiene?(o.int>=bb.int)+(o.pub>=bb.pub)+(o.resp<=bb.resp)+(o.leads>=bb.leads):'']}));
-  else if(CP.tab==='plat')rows=[['Empresa','Instagram','TikTok','Facebook','YouTube','Total']].concat(D.map(function(x){var d=x.d||{fol:{}};return [x.f.e.nombre,d.fol.Instagram,d.fol.TikTok,d.fol.Facebook,d.fol.YouTube,d.seg]}));
+  else if(CP.tab==='plat'){var M2=CP_PM[CP.pm]||CP_PM.fol;rows=[['Empresa'].concat(PLATS)].concat(D.map(function(x){return [x.f.e.nombre].concat(PLATS.map(function(k){return x.d?M2[1](x.d,k):''}))}))}
   else rows=[['Empresa','Seguidores','Crecimiento %','Alcance','Interacciones','Tasa de interacción %','Ventas','Ingresos','Var. ingresos %','Publicados']].concat(D.map(function(x){var d=x.d||{};return [x.f.e.nombre,d.seg,d.crec!=null?d.crec.toFixed(1):'',d.alc,d.inter,d.tasa!=null?d.tasa.toFixed(1):'',d.ventas,d.ing,d.vari!=null?d.vari.toFixed(1):'',d.pub]}));
   bajar(new Blob(['\ufeff'+rows.map(function(r){return r.map(q).join(',')}).join('\r\n')],{type:'text/csv;charset=utf-8'}),'comparativo-'+CP.tab+'-'+CP.mes+'.csv');toast('CSV descargado');
 }
@@ -1236,6 +1261,8 @@ function bajarZip(){
 }
 /* Módulo Estadísticas */
 var ESD=null,EST={mes:''};
+var PLM=[['followers','Seguidores'],['reach','Alcance'],['inter','Interacciones'],['posts','Publicaciones'],['visits','Visitas al perfil o clics']];
+function tasaPl(q){return q&&q.reach?q.inter/q.reach*100:null}
 var PLATS=['Instagram','TikTok','Facebook','YouTube'];
 function statsLista(e,nd){
   var base=[],m={};
@@ -1265,21 +1292,125 @@ function pintarES(){
   var f=cur.followers||{};
   b.innerHTML='<p class="sub" style="margin:-8px 0 14px">Resultados de '+esc(nombreMes(mes))+' · tasa de interacción '+tasa+'%.</p>'+
    '<section class="kpi"><div class="stat"><span>Seguidores</span><b>'+seg+'</b><span>'+vr(seg,prev&&segTot(prev))+'</span></div><div class="stat"><span>Alcance</span><b>'+cur.reach+'</b><span>'+vr(cur.reach,prev&&prev.reach)+'</span></div><div class="stat"><span>Interacciones</span><b>'+cur.interactions+'</b><span>'+vr(cur.interactions,prev&&prev.interactions)+'</span></div><div class="stat"><span>Ventas</span><b>$'+(Number(cur.income)||0).toLocaleString('es-CO')+'</b><span>'+(cur.sales||0)+' ventas</span></div></section>'+
-   '<h2>Crecimiento de seguidores</h2><div class="panel"><div class="bars">'+ESD.map(function(x){var t=segTot(x);return '<div><span>'+t+'</span><i style="height:'+Math.round(t/mx*85)+'%"></i><span>'+esc(x.month.slice(2))+'</span></div>'}).join('')+'</div></div>'+
+   tablaPlat(cur,prev)+'<h2>Crecimiento de seguidores</h2><div class="panel"><div class="bars">'+ESD.map(function(x){var t=segTot(x);return '<div><span>'+t+'</span><i style="height:'+Math.round(t/mx*85)+'%"></i><span>'+esc(x.month.slice(2))+'</span></div>'}).join('')+'</div></div>'+
    '<h2>Audiencia por plataforma</h2><div class="panel">'+PLATS.map(function(k){var v=Number(f[k])||0;return '<div class="row"><div style="width:110px" class="row-t">'+k+'</div><div class="row-main"><div class="bar" style="max-width:none;height:10px"><i style="width:'+(seg?Math.round(v/seg*100):0)+'%;background:var(--acc)"></i></div></div><span class="row-s" style="width:90px;text-align:right">'+v+' ('+(seg?Math.round(v/seg*100):0)+'%)</span></div>'}).join('')+'</div>'+
-   '<h2>Ingresos por mes</h2><div class="panel"><div class="bars">'+ESD.map(function(x){var t=Number(x.income)||0;return '<div><span>$'+t.toLocaleString('es-CO')+'</span><i style="height:'+Math.round(t/mi*85)+'%;background:var(--ok)"></i><span>'+esc(x.month.slice(2))+'</span></div>'}).join('')+'</div></div>';
+   '<h2>Ingresos por mes</h2><div class="panel"><div class="bars">'+ESD.map(function(x){var t=Number(x.income)||0;return '<div><span>$'+t.toLocaleString('es-CO')+'</span><i style="height:'+Math.round(t/mi*85)+'%;background:var(--ok)"></i><span>'+esc(x.month.slice(2))+'</span></div>'}).join('')+'</div></div>'+simEstHtml(a,cur,mes)+estrategiaHtml(a,cur,prev,mes);
+}
+var SIM_M=[['int','Interacción','%',false],['pub','Publicaciones por semana','',false],['resp','Respuesta en WhatsApp','min',true],['leads','Contactos al mes','',false],['seg','Seguidores','',false]];
+function mesDeEmp(e,mes){
+  var f=(typeof CPD!=='undefined'&&CPD)?CPD.filas.filter(function(x){return x.e.id===e.id})[0]:null,l=f?f.st:((S.stats||{})[e.id]||[]);
+  return l.filter(function(x){return x.month===mes})[0]||l.filter(function(x){return x.month<mes}).sort(function(a,b){return b.month.localeCompare(a.month)})[0]||null;
+}
+function metricasDe(e,r){
+  var o=(typeof DGD!=='undefined'&&DGD&&DGD.bm)?datosEmp(e):Object.assign({},(S.diag||{})[e.id]||{}),sec=o.sector||SECT_TIPO[e.tipo]||'local';
+  var posts=r&&r.plat?PLATS.reduce(function(t,k){return t+((r.plat[k]||{}).posts||0)},0):0,nz=function(v){return v!=null&&v!==''&&!isNaN(Number(v))?Number(v):null};
+  return {seg:r?segTot(r):nz(o.seguidores),int:r&&r.reach?r.interactions/r.reach*100:nz(o.int),pub:posts?posts/4.3:nz(o.pub),resp:nz(o.resp),leads:r&&r.leads?Number(r.leads):nz(o.leads),sector:sec};
+}
+function simResumen(e,mes,r){
+  var tu=metricasDe(e,r||mesDeEmp(e,mes)),bm=(typeof DGD!=='undefined'&&DGD&&DGD.bm)||BM_DEF,b=bm[tu.sector]||BM_DEF.local,filas=[];
+  S.empresas.forEach(function(x){
+    if(x.id===e.id)return;
+    if(x.tipo===e.tipo||nichoDe(x)===nichoDe(e)){var m=metricasDe(x,mesDeEmp(x,mes));if(m.int!=null||m.seg!=null)filas.push({n:x.nombre,t:'Tu cartera',seg:m.seg,int:m.int,pub:m.pub,resp:m.resp,leads:m.leads})}
+  });
+  ((S.sim||{})[e.id]||[]).forEach(function(x){filas.push({n:x.nombre,t:'Referencia',seg:x.seg,int:x.int,pub:x.pub,resp:x.resp,leads:x.leads,nota:x.nota})});
+  var av=function(k){var v=filas.map(function(x){return Number(x[k])}).filter(function(x){return !isNaN(x)&&x>0});return v.length?v.reduce(function(t,x){return t+x},0)/v.length:null},ava={};
+  SIM_M.forEach(function(m){ava[m[0]]=av(m[0])});
+  return {tu:tu,b:b,filas:filas,avg:ava};
+}
+function simVeredicto(R){
+  var out=[],ok=0,tot=0;
+  SIM_M.forEach(function(m){
+    var y=R.tu[m[0]],p=R.avg[m[0]];if(y==null||p==null)return;
+    var mejor=m[3]?y<=p:y>=p;tot++;if(mejor)ok++;
+    out.push({k:m[0],etq:m[1],u:m[2],y:y,p:p,mejor:mejor});
+  });
+  return {items:out,ok:ok,tot:tot};
+}
+function fmtSim(v,u,k){return v==null?'-':(k==='int'||k==='pub'?Number(v).toFixed(1):Math.round(v).toLocaleString('es-CO'))+(u==='min'?' min':(u||''))}
+function simEstHtml(a,cur,mes){
+  var R=simResumen(a,mes,cur),V=simVeredicto(R),btn='<button class="btn sm pri" data-act="simnueva">Agregar similar</button>';
+  if(!R.filas.length)return '<h2>Frente a negocios similares</h2><div class="hint" style="margin:0">Aún no hay con quién comparar a '+esc(a.nombre)+'. Agrega negocios similares con su información pública (seguidores, interacción, publicaciones por semana) o registra otra empresa del mismo tipo en tu cartera.<div class="acts" style="margin-top:8px">'+btn+'</div></div>';
+  var c=function(v,u,k){return '<td>'+fmtSim(v,u,k)+'</td>'};
+  var rows='<tr style="background:rgba(245,184,61,.12)"><td><b>'+esc(a.nombre)+'</b></td><td>Tú</td>'+c(R.tu.seg,'','seg')+c(R.tu.int,'%','int')+c(R.tu.pub,'','pub')+c(R.tu.resp,'','resp')+c(R.tu.leads,'','leads')+'</tr>'+
+    R.filas.map(function(x){return '<tr><td>'+esc(x.n)+(x.nota?'<div class="row-s">'+esc(x.nota)+'</div>':'')+'</td><td>'+x.t+'</td>'+c(x.seg,'','seg')+c(x.int,'%','int')+c(x.pub,'','pub')+c(x.resp,'','resp')+c(x.leads,'','leads')+'</tr>'}).join('')+
+    '<tr><td><b>Promedio de similares</b></td><td>'+R.filas.length+' negocio(s)</td>'+c(R.avg.seg,'','seg')+c(R.avg.int,'%','int')+c(R.avg.pub,'','pub')+c(R.avg.resp,'','resp')+c(R.avg.leads,'','leads')+'</tr>'+
+    '<tr><td>Promedio del sector</td><td>Sector</td><td>-</td><td>'+R.b.int+'%</td><td>'+R.b.pub+'</td><td>'+R.b.resp+'</td><td>'+R.b.leads+'</td></tr>';
+  return '<h2>Frente a negocios similares</h2><div class="panel" style="padding:12px 16px">'+
+    (V.tot?'<div class="row-t" style="margin-bottom:4px">Vas mejor que tus similares en '+V.ok+' de '+V.tot+' indicadores.</div>'+V.items.map(function(i){return '<div class="insight '+(i.mejor?'ok':'mal')+'"><b>'+i.etq+':</b> tú '+fmtSim(i.y,i.u,i.k)+' · similares '+fmtSim(i.p,i.u,i.k)+' ('+(i.mejor?'vas mejor':'vas por debajo')+')</div>'}).join(''):'<p class="row-s">Faltan cifras para comparar. Registra el mes por red y completa los datos de tus similares.</p>')+
+    '<div style="overflow-x:auto;margin-top:8px"><table class="tbl"><tr><th>Negocio</th><th>Tipo</th><th>Seguidores</th><th>Interacción</th><th>Pub./sem</th><th>Resp. (min)</th><th>Contactos</th></tr>'+rows+'</table></div>'+
+    '<div class="acts" style="margin-top:10px">'+btn+'</div><p class="row-s">Edita o elimina las referencias en Diagnóstico y estrategia, pestaña Similares. Tu cartera cuenta como similar si es del mismo tipo de negocio o de servicio.</p></div>';
+}
+function tablaPlat(cur,prev){
+  var pl=cur.plat||{},f=cur.followers||{},pf=prev?prev.followers||{}:{},act=PLATS.filter(function(k){return (Number(f[k])||0)>0||pl[k]});
+  if(!act.length)return '<h2>Resultados por plataforma</h2><div class="hint" style="margin:0">Aún no registraste datos por red. Pulsa <b>Registrar mes</b> y llena Instagram, TikTok, Facebook o YouTube para ver cuál rinde más y recibir recomendaciones.</div>';
+  var best=null;act.forEach(function(k){var t=tasaPl(pl[k]);if(t!=null&&(best==null||t>tasaPl(pl[best])))best=k});
+  return '<h2>Resultados por plataforma</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Red</th><th>Seguidores</th><th>Cambio</th><th>Alcance</th><th>Interacciones</th><th>Tasa</th><th>Publicaciones</th><th>Visitas o clics</th></tr>'+act.map(function(k){var q=pl[k]||{},sg=Number(f[k])||0,ps=Number(pf[k])||0,ch=ps?(sg-ps)/ps*100:null,t=tasaPl(q);return '<tr><td><b>'+k+'</b>'+(k===best?' <span class="badge">mejor interacción</span>':'')+'</td><td>'+sg.toLocaleString('es-CO')+'</td><td style="'+colPct(ch)+'">'+pct1(ch)+'</td><td>'+(q.reach||0).toLocaleString('es-CO')+'</td><td>'+(q.inter||0).toLocaleString('es-CO')+'</td><td>'+(t==null?'-':t.toFixed(1)+'%')+'</td><td>'+(q.posts||0)+'</td><td>'+(q.visits||0)+'</td></tr>'}).join('')+'</table></div>';
+}
+function estrategiaMes(a,cur,prev){
+  var out=[],pl=cur.plat||{},f=cur.followers||{},pf=prev?prev.followers||{}:{},nm=function(t){return '<b>'+esc(t)+'</b>'},act=PLATS.filter(function(k){return (Number(f[k])||0)>0||pl[k]});
+  if(!act.length)out.push(['','Registra los datos por red para recibir recomendaciones por plataforma. Mientras tanto: publica con regularidad y cierra cada publicación con un llamado a escribir por WhatsApp.']);
+  var rt=act.filter(function(k){return tasaPl(pl[k])!=null}).sort(function(x,y){return tasaPl(pl[y])-tasaPl(pl[x])});
+  if(rt.length>1){
+    out.push(['ok','Prioriza '+nm(rt[0])+': tiene la mejor interacción ('+tasaPl(pl[rt[0]]).toFixed(1)+'%). Pásale la mayor parte de tus publicaciones del próximo mes.']);
+    var w=rt[rt.length-1];if(tasaPl(pl[w])<tasaPl(pl[rt[0]])*0.6)out.push(['mal',nm(w)+' llega a gente pero interactúa poco ('+tasaPl(pl[w]).toFixed(1)+'%). Mejora el gancho de la primera línea o los primeros 3 segundos y cierra con una pregunta.']);
+  }else if(rt.length===1)out.push(['ok',nm(rt[0])+' tiene interacción de '+tasaPl(pl[rt[0]]).toFixed(1)+'%. Registra otra red para poder compararlas.']);
+  act.forEach(function(k){
+    var sg=Number(f[k])||0,ps=Number(pf[k])||0;
+    if(ps>0){var c=(sg-ps)/ps*100;if(c>=5)out.push(['ok',nm(k)+' creció '+pct1(c)+' en seguidores. Repite los formatos y los horarios que usaste ahí.']);else if(c<0)out.push(['mal',nm(k)+' perdió seguidores ('+pct1(c)+'). Revisa la frecuencia y la calidad de lo que publicas y responde los comentarios.'])}
+    if(sg>0&&pl[k]&&!pl[k].posts)out.push(['mal',nm(k)+' tiene '+sg.toLocaleString('es-CO')+' seguidores y ninguna publicación registrada este mes.']);
+  });
+  var lead=Number(cur.leads)||0,ven=Number(cur.sales)||0;
+  if(lead>0){
+    var ci=ven/lead*100;out.push([ci<30?'mal':'ok','De '+lead+' contactos cerraron '+ven+' ventas ('+ci.toFixed(0)+'%). '+(ci<30?'Responde más rápido por WhatsApp, deja precio y forma de pago claros en el primer mensaje y haz seguimiento al día siguiente.':'Buen cierre: ahora invierte en traer más contactos.')]);
+    if(prev&&Number(prev.leads)>0){var dl=(lead-prev.leads)/prev.leads*100;if(dl<-10)out.push(['mal','Los contactos bajaron '+pct1(dl)+' frente al mes anterior. Pon un llamado a escribir por WhatsApp en cada publicación e historia.'])}
+  }else if(act.length)out.push(['','No registraste contactos recibidos. Anótalos cada mes para saber qué red trae clientes de verdad.']);
+  if(prev){var pi=Number(prev.income)||0,ci2=Number(cur.income)||0;if(pi>0){var dv=(ci2-pi)/pi*100;out.push([dv<0?'mal':'ok','Los ingresos '+(dv<0?'bajaron ':'subieron ')+pct1(dv)+' frente al mes anterior. '+(dv<0?'Planea una promoción o un combo para las dos primeras semanas del mes.':'Mantén lo que funcionó y sube la meta.')])}}
+  try{
+    var Rs=simResumen(a,cur.month,cur);
+    if(Rs.filas.length)simVeredicto(Rs).items.forEach(function(i){
+      if(i.mejor)return;
+      var t={int:'Tu interacción ('+fmtSim(i.y,'%','int')+') está por debajo de la de tus similares ('+fmtSim(i.p,'%','int')+'). Prueba videos cortos con una pregunta al final y responde cada comentario en la primera hora.',
+        pub:'Publicas '+fmtSim(i.y,'','pub')+' veces por semana y tus similares '+fmtSim(i.p,'','pub')+'. Sube a '+Math.ceil(i.p)+' por semana para no quedar atrás.',
+        resp:'Respondes en '+fmtSim(i.y,'','resp')+' min y tus similares en '+fmtSim(i.p,'','resp')+'. Activa respuestas rápidas en WhatsApp Business.',
+        leads:'Tus similares reciben '+fmtSim(i.p,'','leads')+' contactos al mes y tú '+fmtSim(i.y,'','leads')+'. Pon el enlace de WhatsApp en la biografía y en cada publicación.',
+        seg:'Tus similares tienen en promedio '+fmtSim(i.p,'','seg')+' seguidores y tú '+fmtSim(i.y,'','seg')+'. Alíate con negocios cercanos y pide a tus clientes que te etiqueten.'}[i.k];
+      if(t)out.push(['mal','Frente a similares: '+t]);
+    });
+  }catch(e){}
+  out.push(['','Crea los guiones del mes en Guiones y voz, pestaña Plantillas, con el acento '+nm(REG[regionDe(a)].n)+' y el estilo de '+nm(NICHOS[nichoDe(a)])+'.']);
+  return out;
+}
+function estrategiaHtml(a,cur,prev,mes){
+  var it=estrategiaMes(a,cur,prev),ia=((S.estrat||{})[a.id]||{})[mes],pl=cur.plat||{},f=cur.followers||{},act=PLATS.filter(function(k){return (Number(f[k])||0)>0||pl[k]}),m='';
+  if(act.length){
+    var tp=act.reduce(function(t,k){return t+((pl[k]||{}).posts||0)},0),tot=Math.max(8,Math.round(tp*1.15)),ps=act.map(function(k){var t=tasaPl(pl[k]);return t==null?1:Math.max(t,0.5)}),sp=ps.reduce(function(t,x){return t+x},0);
+    m='<div class="insight"><b>Metas sugeridas para el próximo mes:</b> seguidores '+Math.round(segTot(cur)*1.08).toLocaleString('es-CO')+' (+8%), interacciones '+Math.round((Number(cur.interactions)||0)*1.1).toLocaleString('es-CO')+' (+10%), ingresos $'+Math.round((Number(cur.income)||0)*1.1).toLocaleString('es-CO')+' (+10%).<br><b>Publicaciones ('+tot+' en total):</b> '+act.map(function(k,i){return esc(k)+' '+Math.max(1,Math.round(tot*ps[i]/sp))}).join(' · ')+'.</div>';
+  }
+  return '<h2>Estrategia para el próximo mes</h2><div class="panel" style="padding:12px 16px">'+it.map(function(i){return '<div class="insight '+i[0]+'">'+i[1]+'</div>'}).join('')+m+'<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="esia">'+(ia?'Volver a pedir el plan a Gemini':'Pedir plan detallado a Gemini')+'</button></div>'+(ia?'<div class="pre" style="margin-top:10px">'+esc(ia)+'</div><div class="acts">'+cp(ia)+'</div>':'')+(gk().k?'':'<p class="row-s">Para el plan con IA pega tu clave de Gemini en Ajustes.</p>')+'</div>';
+}
+function promptEstrategia(a,ms,cur){
+  var R=REG[regionDe(a)],it=estrategiaMes(a,cur,ms.length>1?ms[ms.length-2]:null).map(function(i){return i[1].replace(/<[^>]+>/g,'')}).join('\n- ');
+  return 'Eres estratega de marketing digital para negocios locales de Colombia. Negocio: '+a.nombre+' ('+a.tipo+', '+a.ciudad+'). Región y tono: '+R.n+'. Productos: '+a.productos+'. Público: '+a.publico+'. Objetivo: '+a.objetivo+'.\nResultados de los últimos meses en JSON: '+JSON.stringify(ms.map(function(m){return {mes:m.month,seguidores:m.followers,por_red:m.plat,alcance:m.reach,interacciones:m.interactions,contactos:m.leads,ventas:m.sales,ingresos:m.income,nota:m.nota}}))+'\nHallazgos automáticos:\n- '+it+'\nEscribe en español, claro y sin tecnicismos, un plan para el próximo mes con: 1) qué red priorizar y por qué, 2) calendario de publicaciones por semana (formato, tema y llamado a la acción), 3) tres ideas de contenido adaptadas a la región, 4) metas medibles, 5) qué dejar de hacer. Máximo 350 palabras. No prometas resultados garantizados.';
 }
 function formEst(){
-  var a=activa(),cur=ESD&&ESD.filter(function(x){return x.month===EST.mes})[0]||{followers:{}};
-  var n=function(id,l,v){return '<div class="f"><label for="'+id+'">'+l+'</label><input type="number" step="any" min="0" id="'+id+'" value="'+(v||0)+'"></div>'};
-  abrirD2('Registrar mes de '+a.nombre,'<form id="frmS" class="pw" style="max-width:none"><div class="f"><label for="s0">Mes</label><input type="month" id="s0" required value="'+(cur.month||PL.mes)+'"></div>'+PLATS.map(function(k,i){return n('sf'+i,'Seguidores en '+k,cur.followers[k])}).join('')+n('s1','Alcance',cur.reach)+n('s2','Interacciones',cur.interactions)+n('s3','Ventas (cantidad)',cur.sales)+n('s4','Ingresos ($)',cur.income)+'<div><button type="submit" class="btn pri">Guardar mes</button></div></form>');
+  var a=activa(),cur=(ESD&&ESD.filter(function(x){return x.month===EST.mes})[0])||{},n=function(id,l){return '<div class="f"><label for="'+id+'">'+l+'</label><input type="number" step="any" min="0" id="'+id+'" value="0"></div>'};
+  abrirD2('Registrar mes de '+a.nombre,'<form id="frmS" class="pw" style="max-width:none"><div class="f"><label for="s0">Mes</label><input type="month" id="s0" required value="'+(cur.month||PL.mes)+'"></div><p class="row-s" style="margin:0 0 10px">Llena solo las redes que usa este negocio. El alcance y las interacciones totales se suman solos.</p>'+
+   PLATS.map(function(k,i){return '<fieldset class="fs"><legend>'+k+'</legend><div class="grid" style="grid-template-columns:1fr 1fr">'+PLM.map(function(m,j){return n('p'+i+'_'+j,m[1])}).join('')+'</div></fieldset>'}).join('')+
+   '<fieldset class="fs"><legend>Resultados del negocio</legend><div class="grid" style="grid-template-columns:1fr 1fr">'+n('s1','Alcance total (si no lo llenas por red)')+n('s2','Interacciones totales (si no las llenas por red)')+n('s5','Contactos o mensajes recibidos')+n('s3','Ventas (cantidad)')+n('s4','Ingresos ($)')+'</div><div class="f"><label for="s6">Qué hiciste este mes (campañas, promociones, formatos)</label><textarea id="s6" rows="3"></textarea></div></fieldset><div><button type="submit" class="btn pri">Guardar mes</button></div></form>');
+  llenarFormEst(cur);
 }
+function llenarFormEst(r){
+  r=r||{};var pl=r.plat||{},set=function(id,v){var e=$('#'+id);if(e)e.value=v==null?'':v},sr=0,si=0;
+  PLATS.forEach(function(k,i){var q=pl[k]||{};sr+=Number(q.reach)||0;si+=Number(q.inter)||0;set('p'+i+'_0',(r.followers||{})[k]||0);set('p'+i+'_1',q.reach||0);set('p'+i+'_2',q.inter||0);set('p'+i+'_3',q.posts||0);set('p'+i+'_4',q.visits||0)});
+  set('s1',sr?0:(r.reach||0));set('s2',si?0:(r.interactions||0));set('s3',r.sales||0);set('s4',r.income||0);set('s5',r.leads||0);set('s6',r.nota||'');
+}
+document.addEventListener('change',function(ev){if(ev.target.id==='s0'){var r=(ESD||[]).filter(function(x){return x.month===ev.target.value})[0];llenarFormEst(r||{})}});
 document.addEventListener('submit',function(ev){
   if(ev.target.id!=='frmS')return;
   ev.preventDefault();
-  var a=activa(),v=function(i){return Number($(i).value)||0},fo={};
-  PLATS.forEach(function(k,i){fo[k]=v('#sf'+i)});
-  var r={month:$('#s0').value,followers:fo,reach:v('#s1'),interactions:v('#s2'),sales:v('#s3'),income:v('#s4')};
+  var a=activa(),v=function(i){return Number($(i).value)||0},fo={},pl={},sr=0,si=0;
+  PLATS.forEach(function(k,i){fo[k]=v('#p'+i+'_0');var q={reach:v('#p'+i+'_1'),inter:v('#p'+i+'_2'),posts:v('#p'+i+'_3'),visits:v('#p'+i+'_4')};if(q.reach||q.inter||q.posts||q.visits)pl[k]=q;sr+=q.reach;si+=q.inter});
+  var r={month:$('#s0').value,followers:fo,plat:pl,reach:sr||v('#s1'),interactions:si||v('#s2'),sales:v('#s3'),income:v('#s4'),leads:v('#s5'),nota:$('#s6').value.trim()};
   S.stats=S.stats||{};S.stats[a.id]=(S.stats[a.id]||[]).filter(function(x){return x.month!==r.month}).concat([r]);
   EST.mes=r.month;save();$('#dlg2').close();cargarES();toast('Mes guardado');
 });
@@ -1436,7 +1567,7 @@ document.addEventListener('submit',function(ev){
   S.sim=S.sim||{};var l=S.sim[a.id]=S.sim[a.id]||[],o={nombre:nom,seg:n('#m2'),int:n('#m3'),pub:n('#m4'),resp:n('#m5'),leads:n('#m6'),nota:$('#m7').value.trim()};
   var e=id?l.filter(function(x){return x.id===id})[0]:null;
   if(e)Object.assign(e,o);else{o.id=uid();l.push(o)}
-  save();$('#dlg2').close();pintarDG();toast('Similar guardado');
+  save();$('#dlg2').close();pintarDG();if(route()==='estadisticas')pintarES();toast('Similar guardado');
 });
 function analizarSim(){
   var a=activa();if(!a||DG.busy)return;DG.busy=true;DG.err='';pintarDG();
@@ -2193,7 +2324,7 @@ function fichaCompleta(a){
   return f.filter(function(x){return x[1]&&String(x[1]).trim()}).map(function(x){return x[0]+': '+String(x[1]).trim()}).join('\n')+'\nRegión y acento: '+REG[regionDe(a)].n+'\nUniverso visual: '+(NICHOV[nichoDe(a)]||'');
 }
 function fichaExtra(a){
-  var f=[['Instagram',a.instagram],['Facebook',a.facebook],['TikTok',a.tiktok],['Notas',a.notas]].filter(function(x){return x[1]&&String(x[1]).trim()});
+  var f=[['Instagram',a.instagram],['Facebook',a.facebook],['TikTok',a.tiktok],['YouTube',a.youtube],['Notas',a.notas]].filter(function(x){return x[1]&&String(x[1]).trim()});
   return f.length?'\nDatos adicionales: '+f.map(function(x){return x[0]+': '+String(x[1]).trim().replace(/\n+/g,' | ')}).join('; ')+'.':'';
 }
 function slugC(t){var w=String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 ]/g,' ').trim().split(/\s+/);return w.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1).toLowerCase()}).join('')}

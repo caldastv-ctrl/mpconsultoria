@@ -618,6 +618,8 @@ document.addEventListener('click',function(ev){
   else if(act==='dtnueva'){if(DGD)nuevaTarea()}
   else if(act==='dtborrar'){guardarDiag(function(o){o.tareas=o.tareas.filter(function(t){return String(t.id)!==id})})}
   else if(act==='ptab'){PL.tab=id;renderMain()}
+  else if(act==='phora'){var ph=$('#p4');if(ph)ph.value=id}
+  else if(act==='pweek'){var a8=activa(),nw=semanaSugerida(a8);if(!nw.length)return toast('Ya tienes esas publicaciones en el Planificador.');if(confirm('Se crearán '+nw.length+' borradores en el Planificador para los próximos 7 días, con los horarios sugeridos. ¿Continuar?')){S.plan=(S.plan||[]).concat(nw);PL.mes=nw[0].fecha.slice(0,7);PL.tab='pub';save();renderMain();toast(nw.length+' borradores creados')}}
   else if(act==='pmes'){movMes(Number(id));pintarPL()}
   else if(act==='pnueva')formPub(PL.mes?{fecha:''}:null);
   else if(act==='pedit'){var pe=PLD&&PLD.pubs.filter(function(x){return x.id===id})[0];if(pe)formPub(pe)}
@@ -753,10 +755,161 @@ var hoy=new Date(),PL={tab:'pub',vista:'sem',sem:0,mes:hoy.getFullYear()+'-'+('0
 var TIPOS_PUB=['Post','Reel','Historia','Carrusel','Video','TikTok'],EST_PUB=['idea','programado','publicado'];
 function nombreMes(m){var x=m.split('-');var t=new Date(Number(x[0]),Number(x[1])-1,1).toLocaleDateString('es-CO',{month:'long',year:'numeric'});return t.charAt(0).toUpperCase()+t.slice(1)}
 function movMes(d){var x=PL.mes.split('-'),f=new Date(Number(x[0]),Number(x[1])-1+d,1);PL.mes=f.getFullYear()+'-'+('0'+(f.getMonth()+1)).slice(-2)}
+/* ---------- Mejores horarios para publicar ---------- */
+var DSEM=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DORD=[1,2,3,4,5,6,0];
+function SL(k,d,h1,h2,m){return {k:k,d:d,h:[h1,h2],m:m}}
+var HNICHO={
+ cafe:[SL('man',[1,2,3,4,5],6.5,8.5,'Piensan en su café antes de salir a trabajar'),SL('tar',[1,2,3,4,5],15,17,'La pausa de la tarde'),SL('fds',[6,0],9,11,'Desayuno y plan tranquilo del fin de semana')],
+ resto:[SL('med',[1,2,3,4,5],10.5,12,'Deciden dónde almorzar'),SL('noc',[4,5,6],17,19,'Planean la salida del fin de semana'),SL('fds',[6,0],10,12,'Almuerzo en familia')],
+ tipica:[SL('fds',[6,0],10,12,'Almuerzo en familia: el plato fuerte del negocio'),SL('med',[1,2,3,4,5],10.5,12,'Deciden dónde almorzar'),SL('noc',[4,5],17,19,'Antojo de comida típica para el fin de semana')],
+ pan:[SL('man',[1,2,3,4,5,6],6,8,'Piensan en el pan del desayuno'),SL('tar',[1,2,3,4,5],15.5,17.5,'Las onces de la tarde'),SL('fds',[5,6,0],8,10,'Encargan tortas y postres para el fin de semana')],
+ vela:[SL('noc',[0],18,20.5,'Planean la semana y arreglan la casa'),SL('noc',[4],19,21,'Antes del fin de semana de compras y regalos'),SL('med',[2,3,4],12,14,'Revisan el celular a la hora del almuerzo')],
+ belleza:[SL('noc',[0],19,21,'Se preparan para la semana'),SL('med',[2,3,4],12,14,'Agendan en el almuerzo'),SL('tar',[5],15,18,'Quieren verse bien este fin de semana')],
+ moda:[SL('noc',[3,4,5,6,0],19,21.5,'Navegan y compran en la noche'),SL('tar',[6],14,17,'Salen a comprar o miran catálogos'),SL('med',[2,3],12,14,'Descanso del almuerzo')],
+ tech:[SL('noc',[1,2,3,4,5,6,0],19.5,22,'Hora de series, películas y entretenimiento'),SL('fds',[5,6,0],13,17,'Fin de semana frente a la pantalla'),SL('tar',[1,2,3,4,5],17,19,'Salen del trabajo y buscan entretenerse')],
+ salud:[SL('man',[1,2,3,4,5],6,8,'Empiezan el día con buenos hábitos'),SL('noc',[1,0],19,21,'Se proponen metas para la semana'),SL('med',[2,3,4],12,13.5,'Pausa para cuidarse')],
+ tienda:[SL('man',[1,2,3,4,5,6],6.5,8.5,'Surten la casa antes del trabajo'),SL('tar',[1,2,3,4,5,6],17,19,'Regresan a casa y compran lo que falta'),SL('fds',[5,6],10,12,'Compras del fin de semana')],
+ licor:[SL('noc',[4,5,6],17,20,'Planean la reunión o el brindis del fin de semana'),SL('tar',[6,0],13,16,'Reuniones y asados del fin de semana'),SL('noc',[5],20,21.5,'Último empujón para la noche del viernes')],
+ servicios:[SL('man',[2,3,4],8,10,'Resuelven pendientes al empezar el día'),SL('med',[1,2,3,4],12,13.5,'Consultan en el almuerzo'),SL('tar',[2,3],16,18,'Cierran pendientes del día')],
+ naturaleza:[SL('man',[1,2,3,4,5],7,9,'Empiezan el día'),SL('noc',[1,2,3,4,5,6,0],19,21,'Tiempo libre en la noche'),SL('fds',[6,0],10,12,'Fin de semana tranquilo')]
+};
+var HRED={
+ 'Instagram':{pref:['noc','med','man','tar','fds'],n:5,tipo:'Reel',freq:'4 a 5 publicaciones por semana (3 reels y 1 o 2 carruseles) e historias casi todos los días',tip:'Los reels suelen rendir más en la noche; las historias, en la mañana y al mediodía.'},
+ 'TikTok':{pref:['noc','tar','fds','med','man'],n:4,tipo:'TikTok',freq:'3 a 5 videos por semana',tip:'Publica unos 30 a 60 minutos antes del momento de más actividad para que el video ya esté posicionado.'},
+ 'Facebook':{pref:['med','noc','tar','man','fds'],n:3,tipo:'Post',freq:'3 a 4 publicaciones por semana',tip:'Su público suele ser más adulto: funcionan bien el mediodía y el comienzo de la noche.'},
+ 'YouTube':{pref:['fds','noc','tar','med','man'],n:2,tipo:'Video',freq:'1 video largo por semana o 3 cortos',tip:'Publica antes del fin de semana para que lo encuentren cuando tienen más tiempo.'},
+ 'WhatsApp (estados)':{pref:['man','noc','tar','med','fds'],n:4,tipo:'Historia',freq:'1 a 3 estados por día',tip:'Un estado en la mañana y otro en la tarde con la oferta o la novedad del día.'}
+};
+var HREG={
+ paisa:{sh:{man:-0.5},note:'En la región paisa suele madrugarse: la mañana temprana y la hora de almuerzo rinden bien.'},
+ costa:{sh:{noc:0.5,tar:0.5},note:'En la Costa el mediodía suele ser de calor y descanso, y la vida social arranca más tarde: refuerza las noches y evita publicar entre 12:00 m. y 2:00 p. m.'},
+ pacifico:{sh:{noc:0.5},note:'En el Pacífico la actividad fuerte suele ser en la noche y el fin de semana; el mediodía es de calor.'},
+ valle:{sh:{noc:0.5},note:'En el Valle la tarde y la noche son muy activas y el fin de semana arranca temprano: publica desde el viernes en la tarde.'},
+ bogota:{sh:{man:-0.5,noc:-0.5},note:'En Bogotá la gente se desplaza en horas pico (6 a 8 a. m. y 5 a 8 p. m.): publica justo antes, para que te vean en el transporte.'},
+ opita:{sh:{},note:'En Tolima y Huila el almuerzo suele ser largo y en familia: el mediodía y la tarde del fin de semana funcionan bien.'},
+ santander:{sh:{man:-0.5},note:'En Santander suele madrugarse y trabajarse fuerte: publica temprano y deja la noche para promociones.'},
+ llanero:{sh:{man:-1},note:'En los Llanos el día empieza muy temprano: la mañana temprana y el atardecer suelen rendir más que el mediodía.'},
+ neutro:{sh:{},note:''}
+};
+var HFECHAS=[['San Valentín',2,14,0,'regalos'],['Día de la Mujer',3,8,0,'belleza,moda,vela,regalos'],['Día de la Madre',5,2,'domingo','todos'],['Día del Padre',6,3,'domingo','todos'],['Amor y Amistad',9,3,'sábado','todos'],['Halloween',10,31,0,'pan,moda,licor,regalos'],['Black Friday',11,4,'viernes','moda,tech,tienda,belleza,regalos'],['Navidad',12,25,0,'todos'],['Fin de año',12,31,0,'todos']];
+function lblDias(d){
+  if(d.length===7)return 'Todos los días';
+  var idx=DORD.map(function(x,i){return d.indexOf(x)>=0?i:-1}).filter(function(i){return i>=0}),runs=[],cur=[];
+  idx.forEach(function(i){if(cur.length&&i===cur[cur.length-1]+1)cur.push(i);else{if(cur.length)runs.push(cur);cur=[i]}});if(cur.length)runs.push(cur);
+  return runs.map(function(r){var a0=DSEM[DORD[r[0]]],b0=DSEM[DORD[r[r.length-1]]];return r.length>=3?a0+' a '+b0:r.length===2?a0+' y '+b0:a0}).join(', ');
+}
+function fmtH(h){var hh=Math.floor(h),mm=Math.round((h-hh)*60),suf=hh>=12?'p. m.':'a. m.',h12=hh%12===0?12:hh%12;if(hh===12&&mm===0)suf='m.';return h12+':'+(mm<10?'0':'')+mm+' '+suf}
+function h24(h){var hh=Math.floor(h),mm=Math.round((h-hh)*60);return (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm}
+function slotsRed(red,n,sh,rk){
+  var base=HNICHO[n]||HNICHO.naturaleza,pref=(HRED[red]||HRED.Instagram).pref.slice();
+  if(rk==='costa'){var b2=base.filter(function(x){return x.k!=='med'});if(b2.length>=2)base=b2;pref=pref.filter(function(k){return k!=='med'}).concat(['med'])}
+  return base.map(function(x,i){return {s:x,r:pref.indexOf(x.k)<0?99:pref.indexOf(x.k),i:i}}).sort(function(x,y){return x.r-y.r||x.i-y.i}).slice(0,3).map(function(o){
+    var d=sh[o.s.k]||0,h1=Math.min(22.5,Math.max(5,o.s.h[0]+d)),h2=Math.min(23.5,Math.max(h1+1,o.s.h[1]+d));
+    return {k:o.s.k,d:o.s.d,h:[h1,h2],m:o.s.m};
+  });
+}
+function perfilHorarios(a){
+  var n=nichoDe(a),rk=regionDe(a),R=HREG[rk]||HREG.neutro,pub=norm(a.publico||''),sh={man:0,med:0,tar:0,noc:0,fds:0},notas=[];
+  Object.keys(R.sh).forEach(function(k){sh[k]+=R.sh[k]});if(R.note)notas.push(R.note);
+  if(/joven|universit|estudiant|adolescent/.test(pub)){sh.noc+=1;sh.tar+=0.5;notas.push('Tu público es joven: suele conectarse más tarde en la noche, por eso se corrieron los horarios de tarde y noche.')}
+  else if(/mayor|abuel|pensionad/.test(pub)){sh.man-=0.5;sh.noc-=1;notas.push('Tu público es de mayor edad: suele conectarse más temprano, por eso se adelantaron los horarios de la noche.')}
+  if(/familia|mama|madre|padre|nino/.test(pub))notas.push('Para familias funcionan mejor el fin de semana y el comienzo de la noche (6 a 8 p. m.).');
+  if(/trabajador|empleado|oficina|profesional|empresa/.test(pub))notas.push('Para público que trabaja, aprovecha antes de entrar (6 a 8 a. m.), el almuerzo y la salida (5 a 7 p. m.).');
+  if(n==='licor')notas.push('Licores: dirige la publicación solo a mayores de 18 años (en los ajustes de audiencia de Instagram y Facebook) y no uses sugerencias sexuales ni de salud.');
+  var st=((S.stats||{})[a.id]||[]).slice().sort(function(x,y){return x.month.localeCompare(y.month)}),nueva=!st.length,last=st[st.length-1]||null,
+    red=['Instagram','TikTok','Facebook','YouTube'].filter(function(k){return a[k.toLowerCase()]});
+  if(!red.length)red=['Instagram','Facebook'];
+  var mejor=null;
+  if(last&&last.plat)red.concat(['Instagram','TikTok','Facebook','YouTube']).forEach(function(k){var t=tasaPl(last.plat[k]);if(t!=null&&(mejor==null||t>tasaPl(last.plat[mejor])))mejor=k});
+  var orden=red.slice();if(mejor&&orden.indexOf(mejor)>0){orden.splice(orden.indexOf(mejor),1);orden.unshift(mejor)}
+  var redes=orden.map(function(k,i){return {red:k,prior:i===0?'Principal':'Secundaria',slots:slotsRed(k,n,sh,rk)}});
+  redes.push({red:'WhatsApp (estados)',prior:'Complementaria',slots:slotsRed('WhatsApp (estados)',n,sh,rk)});
+  return {n:n,rk:rk,nueva:nueva,last:last,mejor:mejor,redes:redes,notas:notas,sh:sh};
+}
+function nthDow(y,m,dow,k){var d=new Date(y,m-1,1),c=0;while(true){if(d.getDay()===dow){c++;if(c===k)return d}d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)}}
+function fechasCerca(n){
+  var hoy=new Date();hoy.setHours(0,0,0,0);var out=[];
+  [hoy.getFullYear(),hoy.getFullYear()+1].forEach(function(y){HFECHAS.forEach(function(f){
+    if(f[4]!=='todos'&&f[4].split(',').indexOf(n)<0&&!(f[4].indexOf('regalos')>=0&&['vela','belleza','moda','pan','tienda','tech'].indexOf(n)>=0))return;
+    var d=f[3]===0?new Date(y,f[1]-1,f[2]):nthDow(y,f[1],f[3]==='domingo'?0:f[3]==='sábado'?6:5,f[2]),dif=Math.round((d-hoy)/86400000);
+    if(dif>=0&&dif<=80)out.push({n:f[0],d:d,dif:dif});
+  })});
+  return out.sort(function(x,y){return x.dif-y.dif}).slice(0,4);
+}
+function enVentana(P,fecha,hora){
+  if(!fecha||!hora)return null;var wd=new Date(fecha+'T12:00:00').getDay(),q=String(hora).split(':'),h=Number(q[0])+Number(q[1]||0)/60;
+  return P.redes.some(function(r){return r.slots.some(function(s){return s.d.indexOf(wd)>=0&&h>=s.h[0]-0.01&&h<=s.h[1]+0.01})});
+}
+function horariosHtml(a){
+  var P=perfilHorarios(a),R=REG[P.rk],h='',pr=P.redes[0];
+  h+='<div class="panel" style="padding:14px 16px;margin-bottom:12px"><div class="chips"><span class="badge">'+esc(NICHOS[P.n])+'</span><span class="badge mut">'+esc(R.n)+'</span><span class="badge mut">'+(a.publico?'Público: '+esc(a.publico):'Público sin definir')+'</span><span class="badge'+(P.nueva?'':' mut')+'">'+(P.nueva?'Empresa nueva':'Con estadísticas')+'</span></div>'+
+   '<p class="row-s" style="margin:8px 0 0">Son puntos de partida basados en hábitos generales de este tipo de negocio, esta región y este público. Pruébalos 3 o 4 semanas y quédate con los que mejor funcionen en las estadísticas de la empresa.</p>'+P.notas.map(function(x){return '<div class="insight">'+esc(x)+'</div>'}).join('')+
+   '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="pweek">Crear la semana sugerida en el Planificador</button></div></div>';
+  // semana ideal de la red principal
+  h+='<h2>Semana ideal en '+esc(pr.red)+'</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Día</th><th>Mejor horario</th></tr>'+DORD.map(function(wd){
+    var hs=pr.slots.filter(function(x){return x.d.indexOf(wd)>=0}).sort(function(x,y){return x.h[0]-y.h[0]});
+    return '<tr><td><b>'+DSEM[wd]+'</b></td><td>'+(hs.length?hs.map(function(x){return fmtH(x.h[0])+' a '+fmtH(x.h[1])}).join(' · '):'<span class="row-s">Descanso o solo historias</span>')+'</td></tr>';
+  }).join('')+'</table></div>';
+  // por red
+  h+='<h2>Por red social</h2><div class="grid">'+P.redes.map(function(r){
+    var cfg=HRED[r.red]||HRED.Instagram;
+    return '<article class="card"><div class="row-t">'+esc(r.red)+' <span class="badge'+(r.prior==='Principal'?'':' mut')+'">'+r.prior+'</span></div><div class="row-s" style="margin:4px 0 8px">'+esc(cfg.freq)+'</div>'+
+     r.slots.map(function(x,i){return '<div class="insight'+(i===0?' ok':'')+'"><b>'+lblDias(x.d)+':</b> '+fmtH(x.h[0])+' a '+fmtH(x.h[1])+'<div class="row-s">'+esc(x.m)+'</div></div>'}).join('')+'<div class="row-s">'+esc(cfg.tip)+'</div></article>';
+  }).join('')+'</div>';
+  // plan de prueba o datos propios
+  if(P.nueva){
+    var sl=pr.slots;
+    h+='<h2>Plan de arranque: 4 semanas de prueba</h2><div class="panel" style="overflow-x:auto"><table class="tbl"><tr><th>Semana</th><th>Horario a probar en '+esc(pr.red)+'</th><th>Qué hacer</th></tr>'+
+      [0,1,2].map(function(i){var x=sl[i]||sl[0];return '<tr><td><b>'+(i+1)+'</b></td><td>'+lblDias(x.d)+': '+fmtH(x.h[0])+' a '+fmtH(x.h[1])+'</td><td style="text-align:left">Publica todas tus piezas de la semana en este horario.</td></tr>'}).join('')+
+      '<tr><td><b>4</b></td><td>El mejor de las semanas 1 a 3</td><td style="text-align:left">Repite el que tuvo más alcance e interacción.</td></tr></table></div><p class="row-s">Al final de cada semana anota alcance e interacciones en Estadísticas, botón Registrar mes, y compara.</p>';
+  }else{
+    var ls=[],q=P.last,pl=q&&q.plat?q.plat:{};
+    if(P.mejor)ls.push('Tu red más fuerte es <b>'+esc(P.mejor)+'</b> ('+tasaPl(pl[P.mejor]).toFixed(1)+'% de interacción): por eso va como red principal. Pon ahí tus mejores horarios.');
+    else ls.push('Aún no hay datos por red. Registra el mes por red en Estadísticas para que la app priorice la red que mejor te funciona.');
+    Object.keys(pl).forEach(function(k){var posts=Number(pl[k].posts)||0,sem=posts/4.3,cfg=HRED[k];if(cfg&&posts>0)ls.push('En '+esc(k)+' publicaste unas '+sem.toFixed(1)+' veces por semana. Meta sugerida: '+cfg.n+(sem<cfg.n-1?'. Sube la frecuencia gradualmente.':'.'))});
+    h+='<h2>Con los números de la empresa</h2><div class="panel" style="padding:12px 16px">'+ls.map(function(x){return '<div class="insight">'+x+'</div>'}).join('')+'</div>';
+  }
+  // revisión de lo programado
+  var pubs=(typeof PLD!=='undefined'&&PLD?PLD.pubs:[]).filter(function(x){return x.fecha&&x.hora}),dentro=pubs.filter(function(x){return enVentana(P,x.fecha,x.hora)}),fuera=pubs.filter(function(x){return !enVentana(P,x.fecha,x.hora)});
+  if(pubs.length)h+='<h2>Tus publicaciones con hora</h2><div class="panel" style="padding:12px 16px"><div class="insight '+(dentro.length>=fuera.length?'ok':'mal')+'">'+dentro.length+' de '+pubs.length+' caen dentro de los horarios recomendados.</div>'+
+    fuera.slice(0,5).map(function(x){var d=new Date(x.fecha+'T12:00:00');return '<div class="row"><div class="row-main"><div class="row-t">'+esc(x.titulo)+'</div><div class="row-s">'+DSEM[d.getDay()]+' '+esc(x.fecha)+' · '+esc(x.hora)+' · fuera de las ventanas sugeridas</div></div></div>'}).join('')+'</div>';
+  // fechas comerciales
+  var fc=fechasCerca(P.n);
+  if(fc.length)h+='<h2>Fechas comerciales cerca</h2><div class="panel" style="padding:12px 16px">'+fc.map(function(f){return '<div class="insight"><b>'+esc(f.n)+'</b> · '+f.d.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})+' (en '+f.dif+' días). Empieza a publicar de 10 a 15 días antes.</div>'}).join('')+(['tienda','moda','belleza','resto','tipica','licor','tech'].indexOf(P.n)>=0?'<div class="insight"><b>Días de pago:</b> el 15 y el 30 de cada mes (y los dos días siguientes) suelen mover las compras. Publica tus ofertas justo antes.</div>':'')+'</div>';
+  return h;
+}
+function semanaSugerida(a){
+  var P=perfilHorarios(a),hoy=new Date();hoy.setHours(12,0,0,0);var out=[],ex=(S.plan||[]).filter(function(x){return x.empresa===a.id});
+  P.redes.forEach(function(r){
+    var cfg=HRED[r.red]||HRED.Instagram,max=r.prior==='Principal'?cfg.n:r.prior==='Secundaria'?Math.ceil(cfg.n/2):4,c=0;
+    for(var i=1;i<=7&&c<max;i++){
+      var d=new Date(hoy.getTime()+i*86400000),wd=d.getDay(),sl=r.slots.filter(function(x){return x.d.indexOf(wd)>=0})[0];if(!sl)continue;
+      var iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2),hr=h24(Math.round((sl.h[0]+0.25)*2)/2),ti='Publicar en '+r.red+' ('+cfg.tipo+')';
+      if(ex.some(function(x){return x.fecha===iso&&x.hora===hr&&x.titulo===ti}))continue;
+      out.push({id:uid(),empresa:a.id,titulo:ti,tipo:cfg.tipo,fecha:iso,hora:hr,estado:'idea',notas:'Horario sugerido: '+lblDias(sl.d)+' '+fmtH(sl.h[0])+' a '+fmtH(sl.h[1])});c++;
+    }
+    for(var j=1;j<=7&&c<Math.min(max,3);j++){
+      var d2=new Date(hoy.getTime()+j*86400000),iso2=d2.getFullYear()+'-'+('0'+(d2.getMonth()+1)).slice(-2)+'-'+('0'+d2.getDate()).slice(-2),s0=r.slots[0],hr2=h24(Math.round((s0.h[0]+0.25)*2)/2),ti2='Publicar en '+r.red+' ('+cfg.tipo+')';
+      if(out.concat(ex).some(function(x){return x.fecha===iso2&&x.titulo===ti2}))continue;
+      out.push({id:uid(),empresa:a.id,titulo:ti2,tipo:cfg.tipo,fecha:iso2,hora:hr2,estado:'idea',notas:'Horario base para completar la frecuencia semanal: '+fmtH(s0.h[0])+' a '+fmtH(s0.h[1])});c++;
+    }
+  });
+  return out;
+}
+function horasSug(a,fecha){
+  var P=perfilHorarios(a),wd=fecha?new Date(fecha+'T12:00:00').getDay():null,hs=[];
+  P.redes.forEach(function(r){r.slots.forEach(function(x){if(wd!=null&&x.d.indexOf(wd)<0)return;var t=h24(Math.round((x.h[0]+0.25)*2)/2);if(hs.indexOf(t)<0)hs.push(t)})});
+  return hs.slice(0,4);
+}
+function pintarHsug(){
+  var e=$('#hsug');if(!e)return;var a=activa(),f=$('#p3')?$('#p3').value:'',hs=horasSug(a,f);
+  e.innerHTML=hs.length?'Horas sugeridas'+(f?' para ese día':'')+': '+hs.map(function(t){return '<button type="button" class="rtog" data-act="phora" data-id="'+t+'">'+t+'</button>'}).join(' '):'';
+}
+document.addEventListener('change',function(ev){if(ev.target.id==='p3')pintarHsug()});
 function vPlan(){
   var a=activa();
   return '<header class="ph"><div><h1>Planificador</h1><p class="sub">'+(a?'Publicaciones e ideas de '+esc(a.nombre)+'.':'Elige una empresa para ver su calendario.')+'</p></div><button class="btn pri" data-act="pnueva">Nueva publicación</button></header>'+
-   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
+   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button><button data-act="ptab" data-id="hor" class="'+(PL.tab==='hor'?'on':'')+'">Mejores horarios</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarPL(){
   var a=activa();if(!a)return;
@@ -777,6 +930,7 @@ function cargarPL(){
 function estPub(x){return (S.estPub||{})[x.id]||x.estado||'idea'}
 function pintarPL(){
   var b=$('#plBody');if(!b||!PLD)return;
+  if(PL.tab==='hor'){b.innerHTML=horariosHtml(activa());return}
   if(PL.tab==='ideas'){
     b.innerHTML=PLD.ideas.length?'<div class="grid">'+PLD.ideas.map(function(x,i){return '<article class="card"><div class="row-t">'+esc(x.texto)+'</div><div class="row-s">'+esc([x.plat,x.tipo,x.fecha].filter(Boolean).join(' · '))+'</div><div class="acts"><button class="btn sm pri" data-act="pprog" data-id="'+i+'">Programar</button>'+cp(x.texto)+'</div></article>'}).join('')+'</div>':'<div class="empty"><b>Sin ideas</b>Esta empresa no tiene ideas guardadas.</div>';
     return;
@@ -803,9 +957,10 @@ function formPub(x){
   x=x||{};
   abrirD2(x.id?'Editar publicación':'Nueva publicación','<form id="frmP" class="pw" style="max-width:none"><input type="hidden" id="p0" value="'+esc(x.id||'')+'"><div class="f"><label for="p1">Título o idea</label><input type="text" id="p1" required value="'+esc(x.titulo||'')+'"></div>'+
    '<div class="f"><label for="p2">Tipo</label><select id="p2">'+TIPOS_PUB.map(function(t){return '<option'+(t===x.tipo?' selected':'')+'>'+t+'</option>'}).join('')+'</select></div>'+
-   '<div class="f"><label for="p3">Fecha</label><input type="date" id="p3" value="'+esc(x.fecha||'')+'"></div><div class="f"><label for="p4">Hora</label><input type="time" id="p4" value="'+esc(x.hora||'')+'"></div>'+
+   '<div class="f"><label for="p3">Fecha</label><input type="date" id="p3" value="'+esc(x.fecha||'')+'"></div><div class="f"><label for="p4">Hora</label><input type="time" id="p4" value="'+esc(x.hora||'')+'"><div class="row-s" id="hsug" style="margin-top:6px"></div></div>'+
    '<div class="f"><label for="p5">Estado</label><select id="p5">'+EST_PUB.map(function(t){return '<option'+(t===(x.estado||'programado')?' selected':'')+'>'+t+'</option>'}).join('')+'</select></div>'+
    '<div class="f"><label for="p6">Notas</label><textarea id="p6">'+esc(x.notas||'')+'</textarea></div><div><button type="submit" class="btn pri">Guardar publicación</button></div></form>');
+  pintarHsug();
 }
 document.addEventListener('submit',function(ev){
   if(ev.target.id!=='frmP')return;
@@ -1510,6 +1665,7 @@ function estrategiaMes(a,cur,prev){
       if(t)out.push(['mal','Frente a similares: '+t]);
     });
   }catch(e){}
+  try{var Ph=perfilHorarios(a),r0=Ph.redes[0],s0=r0.slots[0];out.push(['','Horario sugerido para '+r0.red+': '+lblDias(s0.d)+', de '+fmtH(s0.h[0])+' a '+fmtH(s0.h[1])+'. Mira todos en Planificador, pestaña Mejores horarios.'])}catch(e){}
   out.push(['','Crea los guiones del mes en Guiones y voz, pestaña Plantillas, con el acento '+nm(REG[regionDe(a)].n)+' y el estilo de '+nm(NICHOS[nichoDe(a)])+'.']);
   return out;
 }

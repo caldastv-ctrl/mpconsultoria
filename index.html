@@ -269,6 +269,7 @@ var MODS=[
 function uid(){return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 
 function seed(){
   var d=[['Melao Sabor y Café','Cafetería','#c98a4b'],['La Dorada Tolimense','Restaurante','#d9482b'],['Dondecheche','Comercio local','#3f8f5a'],['Camilart','Artesanal','#3b82c4']];
@@ -618,6 +619,21 @@ document.addEventListener('click',function(ev){
   else if(act==='dtnueva'){if(DGD)nuevaTarea()}
   else if(act==='dtborrar'){guardarDiag(function(o){o.tareas=o.tareas.filter(function(t){return String(t.id)!==id})})}
   else if(act==='ptab'){PL.tab=id;renderMain()}
+  else if(act==='pfsubir'){var pfi=$('#pf_file');if(pfi)pfi.click()}
+  else if(act==='pfdel'){var a21=activa(),f21=pfDatos(a21);if(confirm('¿Quitar esta captura?')){f21.caps=f21.caps.filter(function(x){return x.id!==id});kvSet('img:perf_'+id,null).catch(function(){});save();pintarPL()}}
+  else if(act==='pfdia'){var z2=id.split('|'),f22=pfDatos(activa());f22.ins[z2[0]]=f22.ins[z2[0]]||{dias:[]};var ds=(f22.ins[z2[0]].dias||[]).map(Number),d2=Number(z2[1]),ix2=ds.indexOf(d2);if(ix2<0)ds.push(d2);else ds.splice(ix2,1);f22.ins[z2[0]].dias=ds;save();pintarPL()}
+  else if(act==='pfidea'){abrirIdea(ideasPara(activa())[Number(id)])}
+  else if(act==='pfiaidea'){var ia1=pfDatos(activa()).ia;if(ia1&&ia1.ideas[Number(id)])abrirIdea(ia1.ideas[Number(id)])}
+  else if(act==='pfiasemana'){var a23=activa(),ia2=pfDatos(a23).ia;if(!ia2||!ia2.ideas.length)return;var P23=perfilHorarios(a23),hoy23=new Date();hoy23.setHours(12,0,0,0);var nw23=ia2.ideas.slice(0,7).map(function(x,i){var d=new Date(hoy23.getTime()+(i+1)*86400000),iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2),tp=TIPOS_PUB.indexOf(x.tipo)>=0?x.tipo:'Post',hr=/^\d{1,2}:\d{2}$/.test(x.hora||'')?('0'+x.hora).slice(-5):h24(P23.redes[0].slots[0].h[0]+0.25);return {id:uid(),empresa:a23.id,titulo:tituloIdea(x.titulo),tipo:tp,fecha:iso,hora:hr,estado:'idea',notas:'Gancho: '+(x.gancho||'')+' · Cierre: '+(x.cierre||'')}});if(confirm('Se crearán '+nw23.length+' borradores en el Planificador, uno por día. ¿Continuar?')){S.plan=(S.plan||[]).concat(nw23);PL.mes=nw23[0].fecha.slice(0,7);PL.tab='pub';save();renderMain();toast(nw23.length+' borradores creados')}}
+  else if(act==='pfia'){
+    var a24=activa(),f24=pfDatos(a24),caps24=f24.caps.slice().sort(function(x,y){var o={insights:0,perfil:1,publicaciones:2,mejores:3,competencia:4};return (o[x.tipo]||9)-(o[y.tipo]||9)}).slice(0,6);
+    PF.busy=true;PF.err='';pintarPL();
+    Promise.all(caps24.map(function(c){return kvGet('img:perf_'+c.id).then(function(u){return u?{mime:'image/jpeg',data:String(u).split(',')[1]}:null})})).then(function(imgs){
+      imgs=imgs.filter(Boolean);caps24=caps24.filter(function(c,i){return true});
+      if(!imgs.length)toast('Sin capturas: el análisis usará solo los datos escritos.');
+      return llamarGemini(promptPerfil(a24,caps24),imgs);
+    }).then(function(t){aplicarPerfilIA(a24,t);PF.busy=false;pintarPL();toast('Análisis listo. Revísalo antes de aplicarlo.')},function(e){PF.busy=false;PF.err=(e&&e.message)||'No se pudo analizar.';pintarPL()});
+  }
   else if(act==='phora'){var ph=$('#p4');if(ph)ph.value=id}
   else if(act==='pweek'){var a8=activa(),nw=semanaSugerida(a8);if(!nw.length)return toast('Ya tienes esas publicaciones en el Planificador.');if(confirm('Se crearán '+nw.length+' borradores en el Planificador para los próximos 7 días, con los horarios sugeridos. ¿Continuar?')){S.plan=(S.plan||[]).concat(nw);PL.mes=nw[0].fecha.slice(0,7);PL.tab='pub';save();renderMain();toast(nw.length+' borradores creados')}}
   else if(act==='pmes'){movMes(Number(id));pintarPL()}
@@ -800,6 +816,54 @@ function lblDias(d){
 }
 function fmtH(h){var hh=Math.floor(h),mm=Math.round((h-hh)*60),suf=hh>=12?'p. m.':'a. m.',h12=hh%12===0?12:hh%12;if(hh===12&&mm===0)suf='m.';return h12+':'+(mm<10?'0':'')+mm+' '+suf}
 function h24(h){var hh=Math.floor(h),mm=Math.round((h-hh)*60);return (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm}
+var IDEAS_BASE=[
+ {p:'Producto',tipo:'Reel',t:'Reel: {p1} en 15 segundos, de cerca y con sonido real',g:'Muestra lo más llamativo en el primer segundo.',c:'Cierra con "Pídelo por WhatsApp".'},
+ {p:'Proceso',tipo:'Reel',t:'Reel: así hacemos {p1}, paso a paso',g:'Empieza por el momento más llamativo del proceso.',c:'Pregunta qué quieren ver después.'},
+ {p:'Educación',tipo:'Carrusel',t:'Carrusel: 3 cosas que debes saber antes de pedir {p1}',g:'La portada promete algo útil y concreto.',c:'Último slide: "Escríbenos y te asesoramos".'},
+ {p:'Producto',tipo:'Carrusel',t:'Carrusel: lo más pedido de {nombre}',g:'Una foto limpia por producto, con su precio.',c:'Cierra con el enlace a WhatsApp.'},
+ {p:'Comunidad',tipo:'Historia',t:'Historia: encuesta "¿{p1} o {p2}?"',g:'Usa el sticker de encuesta.',c:'Responde a quienes voten.'},
+ {p:'Prueba social',tipo:'Post',t:'Post: un cliente real y su pedido (con su permiso)',g:'Foto real, sin retoques exagerados.',c:'Invita a contar su experiencia.'},
+ {p:'Promoción',tipo:'Post',t:'Post: oferta de la semana en {p1}',g:'Precio o beneficio claro en la imagen.',c:'Fecha límite y botón de WhatsApp.'},
+ {p:'Detrás de cámaras',tipo:'Historia',t:'Historia: un día en {nombre}',g:'Tres clips cortos: abrir, preparar, entregar.',c:'Pide que les escriban sus dudas.'},
+ {p:'Región',tipo:'Reel',t:'Reel: {p1} inspirado en {cultura1}',g:'Une el producto con algo propio de tu región.',c:'Pregunta si lo conocían.'},
+ {p:'Respuestas',tipo:'Reel',t:'Reel: respondemos la pregunta que más nos hacen',g:'Lee la pregunta en voz alta en el primer segundo.',c:'Invita a dejar otra pregunta.'},
+ {p:'Diferencial',tipo:'Post',t:'Post: por qué elegirnos ({dif1})',g:'Una sola idea fuerte en la imagen.',c:'Cierra con el llamado a pedir.'},
+ {p:'Promoción',tipo:'Historia',t:'Historia: promo solo por hoy con cuenta regresiva',g:'Usa el sticker de cuenta regresiva.',c:'Botón o enlace a WhatsApp.'},
+ {p:'Educación',tipo:'Reel',t:'Reel: mito vs verdad sobre {p1}',g:'Empieza diciendo el mito en voz alta.',c:'Pide guardar el video.'},
+ {p:'Comunidad',tipo:'TikTok',t:'TikTok: tendencia del momento adaptada a {p1}',g:'Usa un audio en tendencia con tu producto como protagonista.',c:'Invita a comentar con un emoji.'}
+];
+function II(p,tipo,t,g,c){return {p:p,tipo:tipo,t:t,g:g,c:c}}
+var IDEAS_NICHO={
+ cafe:[II('Proceso','Reel','Reel: la preparación de {p1} a cámara lenta','Primer plano del líquido cayendo.','Invita a venir por uno hoy.'),II('Producto','Carrusel','Carrusel: combos de café y algo para acompañar','Una foto por combo con precio.','Cierra con el horario.')],
+ resto:[II('Producto','Reel','Reel: el plato que más sale hoy, recién servido','Vapor y primer corte en el primer segundo.','Invita a reservar mesa.'),II('Promoción','Historia','Historia: el menú del día','Una foto y el precio.','Pide confirmar por WhatsApp.')],
+ tipica:[II('Región','Reel','Reel: la receta de siempre y quién la inventó','Cuenta la historia en una frase.','Pregunta cuál es su plato favorito de casa.'),II('Producto','Reel','Reel: porción completa de {p1} para compartir','Muestra el tamaño real.','Invita a pedir para la familia.')],
+ pan:[II('Proceso','Reel','Reel: sacando la tanda del horno','Humo y sonido del pan crujiendo.','Avisa a qué hora sale la próxima.'),II('Promoción','Historia','Historia: encargos para el fin de semana','Lista corta con precios.','Fecha límite para encargar.')],
+ vela:[II('Proceso','Reel','Reel: armando una vela, de la cera al aroma','Muestra el vertido en el primer segundo.','Pregunta qué aroma quieren ver.'),II('Educación','Carrusel','Carrusel: qué aroma elegir según la ocasión','Una ocasión por slide.','Invita a encargar la suya.')],
+ belleza:[II('Educación','Reel','Reel: un tip rápido de cuidado en 20 segundos','Empieza con el problema.','Invita a agendar cita.'),II('Prueba social','Carrusel','Carrusel: antes y después (con permiso y sin exagerar)','Mismas luz y ángulo en ambas fotos.','Invita a agendar.')],
+ moda:[II('Producto','Reel','Reel: 3 looks con la misma prenda','Muestra la prenda sola y luego los looks.','Pregunta cuál look prefieren.'),II('Educación','Carrusel','Carrusel: guía de tallas y cómo medirse','Un slide por medida.','Invita a escribir su talla.')],
+ tech:[II('Educación','Reel','Reel: cómo se activa en 1 minuto','Muestra el resultado final primero.','Invita a pedir su activación.'),II('Producto','Carrusel','Carrusel: qué incluye cada plan','Una tabla simple y clara.','Cierra con el WhatsApp.')],
+ salud:[II('Educación','Carrusel','Carrusel: un hábito sencillo para esta semana (sin promesas médicas)','Un hábito por slide.','Invita a guardar la publicación.'),II('Producto','Reel','Reel: cómo incluir {p1} en tu rutina','Muestra el momento del día.','Invita a pedir información.')],
+ tienda:[II('Producto','Historia','Historia: llegó mercancía nueva','Muestra la caja abriéndose.','Invita a pasar por el local.'),II('Promoción','Post','Post: combos de la quincena','Precio del combo bien visible.','Fecha límite y WhatsApp.')],
+ licor:[II('Producto','Reel','Reel: cómo servir y acompañar {p1} (solo mayores de edad)','Primer plano del servicio.','Recuerda: consumo responsable.'),II('Promoción','Post','Post: cóctel de la semana (solo mayores de edad)','Foto limpia y receta corta.','Haz tu pedido por WhatsApp.')],
+ servicios:[II('Educación','Carrusel','Carrusel: errores comunes y cómo evitarlos','Un error por slide.','Invita a agendar una asesoría.'),II('Prueba social','Post','Post: un caso resuelto (sin datos del cliente)','Cuenta el problema y la solución.','Invita a escribir.')],
+ naturaleza:[II('Proceso','Reel','Reel: de dónde vienen los ingredientes de {p1}','Empieza por el origen.','Invita a probarlo.')]
+};
+function fillIdea(t,c){return String(t).replace(/\{(\w+)\}/g,function(m,k){return c[k]!=null?c[k]:m})}
+function ideasPara(a){
+  var n=nichoDe(a),R=REG[regionDe(a)],pr=listaTxt(a.productos),dif=listaTxt(a.diferenciales),cu=String(R.cultura||'').split(/,| y /).map(function(x){return x.trim()}).filter(Boolean),
+    c={p1:pr[0]||'nuestro producto',p2:pr[1]||pr[0]||'otro favorito',nombre:a.nombre,ciudad:a.ciudad||'tu ciudad',dif1:dif[0]||'atención cercana',cultura1:cu[0]||'tu tierra'},out=[],f=((S.perfiles||{})[a.id]||{});
+  if(f.funciona&&f.funciona.trim())out.push({p:'Lo que ya funciona',tipo:'Reel',t:'Reel: repetir lo que mejor funcionó ('+f.funciona.trim().slice(0,70)+')',g:'Haz una versión nueva del mismo tema con otro gancho.',c:'Mantén el mismo llamado a la acción.'});
+  (IDEAS_NICHO[n]||[]).concat(IDEAS_BASE).forEach(function(x){out.push({p:x.p,tipo:x.tipo,t:fillIdea(x.t,c),g:fillIdea(x.g,c),c:fillIdea(x.c,c)})});
+  return out;
+}
+function tituloIdea(t){var x=String(t).replace(/^(Reel|Carrusel|Post|Historia|TikTok|Video): /,'');return x.charAt(0).toUpperCase()+x.slice(1)}
+var ESTADOS_WA=[
+ {p:'Producto',tipo:'Historia',t:'Foto del producto del día con su precio',g:'Una sola foto clara.',c:'"Pídelo respondiendo este estado".'},
+ {p:'Comunidad',tipo:'Historia',t:'Pregunta del día: ¿qué quieren ver mañana de {p1}?',g:'Pregunta corta y directa.',c:'Responde a cada mensaje.'},
+ {p:'Promoción',tipo:'Historia',t:'Promo del día con hora límite',g:'Precio y hora en la misma imagen.',c:'Invita a escribir antes de la hora.'},
+ {p:'Detrás de cámaras',tipo:'Historia',t:'Video corto del proceso de {p1}',g:'Máximo 10 segundos.',c:'Pregunta si quieren pedir.'},
+ {p:'Servicio',tipo:'Historia',t:'Recordatorio de horario, domicilio y formas de pago',g:'Un solo mensaje, bien claro.',c:'Invita a hacer su pedido.'}
+];
 function slotsRed(red,n,sh,rk){
   var base=HNICHO[n]||HNICHO.naturaleza,pref=(HRED[red]||HRED.Instagram).pref.slice();
   if(rk==='costa'){var b2=base.filter(function(x){return x.k!=='med'});if(b2.length>=2)base=b2;pref=pref.filter(function(k){return k!=='med'}).concat(['med'])}
@@ -807,6 +871,13 @@ function slotsRed(red,n,sh,rk){
     var d=sh[o.s.k]||0,h1=Math.min(22.5,Math.max(5,o.s.h[0]+d)),h2=Math.min(23.5,Math.max(h1+1,o.s.h[1]+d));
     return {k:o.s.k,d:o.s.d,h:[h1,h2],m:o.s.m};
   });
+}
+function conReal(a,red,sl){
+  var q=((((S.perfiles||{})[a.id]||{}).ins||{})[red]);
+  if(!q||!q.dias||!q.dias.length||!q.h1||!q.h2)return sl;
+  var pt=function(t){var z=String(t).split(':');return Number(z[0])+Number(z[1]||0)/60},h1=pt(q.h1),h2=pt(q.h2);
+  if(!(h2>h1))return sl;
+  return [{k:'real',d:q.dias.map(Number),h:[h1,h2],m:'Datos reales de tus seguidores (Estadísticas de la red)'}].concat(sl).slice(0,3);
 }
 function perfilHorarios(a){
   var n=nichoDe(a),rk=regionDe(a),R=HREG[rk]||HREG.neutro,pub=norm(a.publico||''),sh={man:0,med:0,tar:0,noc:0,fds:0},notas=[];
@@ -822,7 +893,7 @@ function perfilHorarios(a){
   var mejor=null;
   if(last&&last.plat)red.concat(['Instagram','TikTok','Facebook','YouTube']).forEach(function(k){var t=tasaPl(last.plat[k]);if(t!=null&&(mejor==null||t>tasaPl(last.plat[mejor])))mejor=k});
   var orden=red.slice();if(mejor&&orden.indexOf(mejor)>0){orden.splice(orden.indexOf(mejor),1);orden.unshift(mejor)}
-  var redes=orden.map(function(k,i){return {red:k,prior:i===0?'Principal':'Secundaria',slots:slotsRed(k,n,sh,rk)}});
+  var redes=orden.map(function(k,i){return {red:k,prior:i===0?'Principal':'Secundaria',slots:conReal(a,k,slotsRed(k,n,sh,rk))}});
   redes.push({red:'WhatsApp (estados)',prior:'Complementaria',slots:slotsRed('WhatsApp (estados)',n,sh,rk)});
   return {n:n,rk:rk,nueva:nueva,last:last,mejor:mejor,redes:redes,notas:notas,sh:sh};
 }
@@ -879,23 +950,143 @@ function horariosHtml(a){
   return h;
 }
 function semanaSugerida(a){
-  var P=perfilHorarios(a),hoy=new Date();hoy.setHours(12,0,0,0);var out=[],ex=(S.plan||[]).filter(function(x){return x.empresa===a.id});
+  var P=perfilHorarios(a),hoy=new Date();hoy.setHours(12,0,0,0);var out=[],ex=(S.plan||[]).filter(function(x){return x.empresa===a.id}),ideas=ideasPara(a),
+    permit={'Instagram':['Reel','Carrusel','Post','Historia'],'TikTok':['TikTok','Reel'],'Facebook':['Post','Carrusel','Reel'],'YouTube':['Video','Reel'],'WhatsApp (estados)':['Historia']},
+    tag={'Instagram':'IG','TikTok':'TT','Facebook':'FB','YouTube':'YT','WhatsApp (estados)':'WA'},usados={};
   P.redes.forEach(function(r){
-    var cfg=HRED[r.red]||HRED.Instagram,max=r.prior==='Principal'?cfg.n:r.prior==='Secundaria'?Math.ceil(cfg.n/2):4,c=0;
+    var cfg=HRED[r.red]||HRED.Instagram,max=r.prior==='Principal'?cfg.n:r.prior==='Secundaria'?Math.ceil(cfg.n/2):4,c=0,pil={},eI=0;
+    function idea(){
+      if(r.red==='WhatsApp (estados)'){var e=ESTADOS_WA[eI%ESTADOS_WA.length];eI++;return {p:e.p,tipo:e.tipo,t:fillIdea(e.t,{p1:(listaTxt(a.productos)[0]||'nuestro producto')}),g:e.g,c:e.c}}
+      var pm=permit[r.red]||['Post'],cand=ideas.filter(function(x){return pm.indexOf(x.tipo)>=0&&!usados[x.t]});
+      if(!cand.length){usados={};cand=ideas.filter(function(x){return pm.indexOf(x.tipo)>=0})}
+      var x=cand.filter(function(q){return !pil[q.p]})[0]||cand[0];usados[x.t]=1;pil[x.p]=1;return x;
+    }
+    function agregar(d,hr,nota){
+      var iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2),x=idea(),ti=tag[r.red]+' · '+tituloIdea(x.t),tp=r.red==='TikTok'?'TikTok':(r.red==='YouTube'?'Video':(x.tipo==='TikTok'?'Reel':x.tipo));
+      if(ex.concat(out).some(function(q){return q.fecha===iso&&q.hora===hr&&q.titulo===ti}))return false;
+      out.push({id:uid(),empresa:a.id,titulo:ti,tipo:tp,fecha:iso,hora:hr,estado:'idea',notas:'Red: '+r.red+' · Pilar: '+x.p+' · Gancho: '+x.g+' · Cierre: '+x.c+' · '+nota});c++;return true;
+    }
     for(var i=1;i<=7&&c<max;i++){
       var d=new Date(hoy.getTime()+i*86400000),wd=d.getDay(),sl=r.slots.filter(function(x){return x.d.indexOf(wd)>=0})[0];if(!sl)continue;
-      var iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2),hr=h24(Math.round((sl.h[0]+0.25)*2)/2),ti='Publicar en '+r.red+' ('+cfg.tipo+')';
-      if(ex.some(function(x){return x.fecha===iso&&x.hora===hr&&x.titulo===ti}))continue;
-      out.push({id:uid(),empresa:a.id,titulo:ti,tipo:cfg.tipo,fecha:iso,hora:hr,estado:'idea',notas:'Horario sugerido: '+lblDias(sl.d)+' '+fmtH(sl.h[0])+' a '+fmtH(sl.h[1])});c++;
+      agregar(d,h24(Math.round((sl.h[0]+0.25)*2)/2),'Horario sugerido: '+lblDias(sl.d)+' '+fmtH(sl.h[0])+' a '+fmtH(sl.h[1]));
     }
     for(var j=1;j<=7&&c<Math.min(max,3);j++){
-      var d2=new Date(hoy.getTime()+j*86400000),iso2=d2.getFullYear()+'-'+('0'+(d2.getMonth()+1)).slice(-2)+'-'+('0'+d2.getDate()).slice(-2),s0=r.slots[0],hr2=h24(Math.round((s0.h[0]+0.25)*2)/2),ti2='Publicar en '+r.red+' ('+cfg.tipo+')';
-      if(out.concat(ex).some(function(x){return x.fecha===iso2&&x.titulo===ti2}))continue;
-      out.push({id:uid(),empresa:a.id,titulo:ti2,tipo:cfg.tipo,fecha:iso2,hora:hr2,estado:'idea',notas:'Horario base para completar la frecuencia semanal: '+fmtH(s0.h[0])+' a '+fmtH(s0.h[1])});c++;
+      var d2=new Date(hoy.getTime()+j*86400000),s0=r.slots[0];
+      agregar(d2,h24(Math.round((s0.h[0]+0.25)*2)/2),'Horario base: '+fmtH(s0.h[0])+' a '+fmtH(s0.h[1]));
     }
   });
   return out;
 }
+var PF={red:'Instagram',tipo:'perfil',t:null,busy:false,err:''};
+var PF_TIPOS=[['perfil','Perfil (bio y foto)'],['publicaciones','Publicaciones recientes'],['insights','Estadísticas o Insights de la red'],['mejores','Publicaciones que mejor funcionaron'],['competencia','Perfil de la competencia']];
+function pfDatos(a){S.perfiles=S.perfiles||{};var f=S.perfiles[a.id];if(!f)f=S.perfiles[a.id]={bio:{},estilo:'',funciona:'',nofunciona:'',ins:{},caps:[],ia:null};if(!f.bio)f.bio={};if(!f.ins)f.ins={};if(!f.caps)f.caps=[];return f}
+function redesPerfil(a){var r=['Instagram','TikTok','Facebook','YouTube'].filter(function(k){return a[k.toLowerCase()]});return r.length?r:['Instagram','Facebook']}
+function reducirImagen(file,max,q){
+  return new Promise(function(res,rej){
+    var r=new FileReader();r.onerror=function(){rej()};
+    r.onload=function(){var im=new Image();im.onerror=function(){rej()};im.onload=function(){
+      var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',q||0.75));
+    };im.src=r.result};
+    r.readAsDataURL(file);
+  });
+}
+function biosSugeridas(a){
+  var n=nichoDe(a),G=NICHOG[n]||NICHOG.naturaleza,pr=listaTxt(a.productos),dif=listaTxt(a.diferenciales),ciu=a.ciudad||'tu ciudad',wa=a.whatsapp?'📲 '+a.whatsapp:'📲 Pedidos por WhatsApp';
+  return [
+   (pr[0]||a.nombre)+' en '+ciu+' 📍\n'+(dif[0]||G.b[0])+'\nHaz tu pedido 👇',
+   a.nombre+' · '+(a.tipo||'Negocio local')+' de '+ciu+'\n'+(dif.slice(0,2).join(' · ')||G.b[0])+'\n'+wa,
+   G.h[0]+'\n'+pr.slice(0,3).join(' · ')+'\n'+wa
+  ];
+}
+function analisisPerfil(a){
+  var f=pfDatos(a),P=perfilHorarios(a),out=[],reds=redesPerfil(a);
+  if(!f.caps.length)out.push(['','Sube al menos una captura del perfil y otra de las estadísticas de cada red para que Gemini pueda analizarlas.']);
+  reds.forEach(function(r){
+    var bio=(f.bio[r]||'').trim();
+    if(!bio){out.push(['','Escribe la bio actual de '+r+' para revisarla.']);return}
+    var nb=norm(bio);
+    if(!/whatsapp|wa\.me|escrib|pide|pedido|reserva|agenda|cotiza|📲|👇/.test(nb)&&!/📲|👇/.test(bio))out.push(['mal',r+': la bio no tiene un llamado a la acción claro (por ejemplo "Haz tu pedido por WhatsApp 👇").']);
+    if(a.ciudad&&nb.indexOf(norm(a.ciudad).split(' ')[0])<0)out.push(['mal',r+': la bio no dice en qué ciudad estás ('+a.ciudad+'). Ayuda a que te encuentren y a que confíen.']);
+    if(bio.length>150&&r==='Instagram')out.push(['mal','Instagram: la bio tiene '+bio.length+' caracteres y el máximo es 150. Acórtala.']);
+    var pr=listaTxt(a.productos)[0];if(pr&&nb.indexOf(norm(pr).split(' ')[0])<0)out.push(['mal',r+': la bio no menciona lo que vendes ('+pr+').']);
+    if(out.length&&out[out.length-1][0]!=='mal')out.push(['ok',r+': la bio se ve completa.']);
+  });
+  if(P.nueva)out.push(['','Empresa nueva: antes de publicar mucho, deja listos la bio, el enlace al WhatsApp o a la landing y 9 publicaciones iniciales para que el perfil no se vea vacío.']);
+  else{var q=P.last;if(q&&q.plat){Object.keys(q.plat).forEach(function(k){var t=tasaPl(q.plat[k]);if(t!=null)out.push([t>=4?'ok':'mal',k+': interacción de '+t.toFixed(1)+'% el último mes registrado. '+(t>=4?'Va bien: repite los formatos que más gustaron.':'Está baja: cambia el gancho de los primeros segundos y cierra con una pregunta.')])})}}
+  if((f.nofunciona||'').trim())out.push(['mal','Dijiste que no ha funcionado: '+f.nofunciona.trim().slice(0,120)+'. Deja de insistir en eso un mes y prueba las ideas nuevas de abajo.']);
+  reds.forEach(function(r){var q=f.ins[r];if(q&&q.dias&&q.dias.length&&q.h1&&q.h2)out.push(['ok','Usaremos tus datos reales de '+r+': '+lblDias(q.dias.map(Number))+', de '+q.h1+' a '+q.h2+'. Ya están en Mejores horarios y en la semana sugerida.'])});
+  return out;
+}
+function iaPerfilHtml(a,ia){
+  if(!ia)return '';
+  var li=function(t,arr,cls){return arr&&arr.length?'<h3 class="row-t" style="margin:12px 0 4px">'+t+'</h3>'+arr.map(function(x){return '<div class="insight '+(cls||'')+'">'+esc(x)+'</div>'}).join(''):''};
+  return '<div class="panel" style="padding:12px 16px;margin-top:10px"><div class="row-s">Análisis de Gemini · '+esc(fmtFecha(new Date(ia.fecha)))+'</div>'+li('Qué está pasando',ia.diagnostico)+li('Fortalezas',ia.fortalezas,'ok')+li('A mejorar',ia.mejorar,'mal')+
+   (ia.bio&&ia.bio.length?'<h3 class="row-t" style="margin:12px 0 4px">Bio sugerida</h3>'+ia.bio.map(function(x){return '<div class="card" style="padding:10px;margin-bottom:6px"><div class="pre" style="margin:0">'+esc(x)+'</div><div class="acts">'+cp(x)+'</div></div>'}).join(''):'')+
+   (ia.horarios&&ia.horarios.length?'<h3 class="row-t" style="margin:12px 0 4px">Horarios que observa</h3>'+ia.horarios.map(function(x){return '<div class="insight"><b>'+esc(x.red||'')+':</b> '+esc([x.dias,x.hora].filter(Boolean).join(' · '))+'<div class="row-s">'+esc(x.motivo||'')+'</div></div>'}).join(''):'')+
+   (ia.ideas&&ia.ideas.length?'<h3 class="row-t" style="margin:12px 0 4px">Ideas recomendadas por Gemini</h3><div class="grid">'+ia.ideas.map(function(x,i){return '<article class="card"><div class="chips"><span class="badge">'+esc(x.tipo||'Post')+'</span>'+(x.hora?'<span class="badge mut">'+esc(x.hora)+'</span>':'')+'</div><div class="row-t">'+esc(x.titulo)+'</div><div class="row-s">Gancho: '+esc(x.gancho||'')+'<br>Cierre: '+esc(x.cierre||'')+'</div><div class="acts"><button class="btn sm pri" data-act="pfiaidea" data-id="'+i+'">Agregar al Planificador</button></div></article>'}).join('')+'</div><div class="acts" style="margin-top:8px"><button class="btn" data-act="pfiasemana">Programar estas ideas en los próximos días</button></div>':'')+'</div>';
+}
+function perfilHtml(a){
+  var f=pfDatos(a),reds=redesPerfil(a),h='',ideas=ideasPara(a).slice(0,8);
+  h+='<div class="panel" style="padding:14px 16px;margin-bottom:12px"><h2 style="margin:0 0 4px;font-size:18px">1. Sube los perfiles de '+esc(a.nombre)+'</h2><p class="row-s" style="margin:0 0 10px">Sube capturas de pantalla: el perfil, las últimas publicaciones y las estadísticas de cada red (en Instagram: Panel profesional, Público, "Horas más activas"). Con eso se analiza qué está pasando, se ajustan los horarios y se proponen ideas. Las capturas se guardan solo en este equipo y en tu respaldo; solo salen de aquí si pides el análisis con Gemini.</p>'+
+   '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"><div class="f"><label for="pf_red">Red</label><select id="pf_red">'+reds.map(function(r){return '<option'+(r===PF.red?' selected':'')+'>'+r+'</option>'}).join('')+'</select></div><div class="f"><label for="pf_tipo">Qué muestra la captura</label><select id="pf_tipo">'+PF_TIPOS.map(function(t){return '<option value="'+t[0]+'"'+(t[0]===PF.tipo?' selected':'')+'>'+t[1]+'</option>'}).join('')+'</select></div></div>'+
+   '<div class="acts"><button class="btn pri" data-act="pfsubir">Subir capturas</button></div><input type="file" id="pf_file" accept="image/*" multiple hidden>'+
+   '<div class="grid" id="pfCaps" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">'+(f.caps.length?f.caps.map(function(c){return '<div class="card" style="padding:8px"><img data-cap="'+esc(c.id)+'" alt="" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--surf2)"><div class="row-s" style="margin:6px 0">'+esc(c.red)+' · '+esc((PF_TIPOS.filter(function(t){return t[0]===c.tipo})[0]||['',''])[1])+'</div><input type="text" data-pfc="'+esc(c.id)+'" placeholder="Nota (opcional)" value="'+esc(c.nota||'')+'"><div class="acts"><button class="btn sm del" data-act="pfdel" data-id="'+esc(c.id)+'">Quitar</button></div></div>'}).join(''):'<p class="row-s">Aún no hay capturas.</p>')+'</div></div>';
+  h+='<div class="panel" style="padding:14px 16px;margin-bottom:12px"><h2 style="margin:0 0 8px;font-size:18px">2. Cuéntanos lo que ves</h2>'+
+   reds.map(function(r){var q=f.ins[r]||{dias:[]};return '<div class="card" style="margin-bottom:10px"><div class="row-t">'+r+'</div><div class="f"><label>Bio actual</label><textarea rows="2" data-pf="bio|'+r+'">'+esc(f.bio[r]||'')+'</textarea></div><div class="f"><label>Cuándo están más activos sus seguidores (lo ves en las estadísticas de la red)</label><div class="chips">'+DORD.map(function(d){return '<button type="button" class="rtog'+((q.dias||[]).map(Number).indexOf(d)>=0?' on':'')+'" data-act="pfdia" data-id="'+r+'|'+d+'">'+DSEM[d]+'</button>'}).join('')+'</div><div class="ld-two" style="margin-top:6px"><div class="f"><input type="time" aria-label="Desde" data-pfi="'+r+'|h1" value="'+esc(q.h1||'')+'"></div><div class="f"><input type="time" aria-label="Hasta" data-pfi="'+r+'|h2" value="'+esc(q.h2||'')+'"></div></div></div></div>'}).join('')+
+   '<div class="f"><label for="pf_estilo">¿Qué publican hoy?</label><textarea id="pf_estilo" rows="2" data-pf="estilo" placeholder="Ej: fotos del producto, algunas historias con promociones">'+esc(f.estilo||'')+'</textarea></div>'+
+   '<div class="f"><label for="pf_funciona">Lo que mejor ha funcionado</label><textarea id="pf_funciona" rows="2" data-pf="funciona" placeholder="Ej: los videos del proceso y las ofertas de fin de semana">'+esc(f.funciona||'')+'</textarea></div>'+
+   '<div class="f"><label for="pf_nofunciona">Lo que no ha funcionado</label><textarea id="pf_nofunciona" rows="2" data-pf="nofunciona">'+esc(f.nofunciona||'')+'</textarea></div></div>';
+  var an=analisisPerfil(a);
+  h+='<div class="panel" style="padding:14px 16px;margin-bottom:12px"><h2 style="margin:0 0 8px;font-size:18px">3. Análisis</h2>'+an.map(function(i){return '<div class="insight '+i[0]+'">'+esc(i[1])+'</div>'}).join('')+
+   '<h3 class="row-t" style="margin:12px 0 4px">Bios sugeridas</h3>'+biosSugeridas(a).map(function(x){return '<div class="card" style="padding:10px;margin-bottom:6px"><div class="pre" style="margin:0">'+esc(x)+'</div><div class="acts">'+cp(x)+'</div></div>'}).join('')+
+   '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="pfia"'+(PF.busy?' disabled':'')+'>'+(PF.busy?'Analizando...':(f.ia?'Volver a analizar con Gemini':'Analizar con Gemini (lee las capturas)'))+'</button></div>'+(PF.err?'<div class="insight mal">'+esc(PF.err)+'</div>':'')+(gk().k?'':'<p class="row-s">Para el análisis con IA pega tu clave de Gemini en Ajustes.</p>')+iaPerfilHtml(a,f.ia)+'</div>';
+  h+='<h2>Ideas recomendadas para '+esc(a.nombre)+'</h2><p class="row-s" style="margin:0 0 8px">Según su tipo de servicio, su región'+(f.funciona?' y lo que dijiste que mejor funciona':'')+'. Cada semana sugerida usa ideas distintas.</p><div class="grid">'+ideas.map(function(x,i){return '<article class="card"><div class="chips"><span class="badge">'+esc(x.tipo)+'</span><span class="badge mut">'+esc(x.p)+'</span></div><div class="row-t">'+esc(tituloIdea(x.t))+'</div><div class="row-s">Gancho: '+esc(x.g)+'<br>Cierre: '+esc(x.c)+'</div><div class="acts"><button class="btn sm pri" data-act="pfidea" data-id="'+i+'">Agregar al Planificador</button></div></article>'}).join('')+'</div>';
+  return h;
+}
+function cargarCaps(){
+  $$('#pfCaps img[data-cap]').forEach(function(im){kvGet('img:perf_'+im.getAttribute('data-cap')).then(function(u){if(u)im.src=u}).catch(function(){})});
+}
+function promptPerfil(a,caps){
+  var f=pfDatos(a),P=perfilHorarios(a),R=REG[P.rk],n=P.n,G=NICHOG[n]||NICHOG.naturaleza,q=P.last,
+    est=q?JSON.stringify({mes:q.month,seguidores:q.followers,por_red:q.plat,alcance:q.reach,interacciones:q.interactions,contactos:q.leads,ventas:q.sales,ingresos:q.income}):'sin estadísticas registradas',
+    lista=caps.map(function(c,i){return (i+1)+') '+c.red+' - '+(PF_TIPOS.filter(function(t){return t[0]===c.tipo})[0]||['',c.tipo])[1]+(c.nota?' ('+c.nota+')':'')}).join('\n'),
+    bios=Object.keys(f.bio).filter(function(k){return f.bio[k]}).map(function(k){return k+': '+f.bio[k]}).join(' | ')||'no indicada',
+    hr=P.redes.map(function(r){var s0=r.slots[0];return r.red+': '+lblDias(s0.d)+' '+fmtH(s0.h[0])+' a '+fmtH(s0.h[1])}).join('; ');
+  return 'Eres consultor de redes sociales para negocios locales de Colombia. Analiza el perfil de este negocio con las capturas de pantalla adjuntas.\nNegocio: '+a.nombre+' ('+a.tipo+' en '+a.ciudad+'). Tipo de servicio: '+NICHOS[n]+'. Región y tono: '+R.n+'. Productos: '+a.productos+'. Diferenciales: '+a.diferenciales+'. Público: '+a.publico+'. Objetivo: '+a.objetivo+'. Estilo del servicio: '+G.e+'.\nBio actual: '+bios+'. Lo que publican hoy: '+(f.estilo||'no indicado')+'. Lo que mejor ha funcionado: '+(f.funciona||'no indicado')+'. Lo que no ha funcionado: '+(f.nofunciona||'no indicado')+'.\nEstadísticas del último mes: '+est+'.\nHorarios generales sugeridos: '+hr+'.\nCapturas adjuntas, en este orden:\n'+lista+'\nReglas: usa solo lo que se ve en las capturas y en los datos; si algo no se alcanza a leer, dilo en el diagnóstico y no lo inventes; no inventes cifras, testimonios ni resultados; no prometas resultados garantizados; para licores todo va dirigido a mayores de edad; para salud no hagas promesas médicas.\nResponde SOLO con un JSON con estas claves: {"diagnostico":["3 a 5 observaciones concretas de lo que ves"],"fortalezas":["2 a 3"],"mejorar":["3 a 5 cosas por corregir, de la más importante a la menos"],"bio":["2 opciones de bio, de máximo 150 caracteres"],"horarios":[{"red":"","dias":"","hora":"ej. 7:00 p. m. a 9:00 p. m.","motivo":"por qué, según lo que se ve"}],"ideas":[{"titulo":"","tipo":"Reel|Carrusel|Historia|Post|Video|TikTok","gancho":"","cierre":"","hora":"HH:MM en formato 24 horas"}]}. Entrega 8 ideas de contenido variadas, adaptadas a la región, al tipo de servicio y a lo que se ve que funciona.';
+}
+function aplicarPerfilIA(a,t){
+  t=String(t||'').replace(/```json|```/g,'');var i=t.indexOf('{'),j=t.lastIndexOf('}');if(i<0||j<i)throw new Error('Gemini no devolvió el formato esperado. Intenta de nuevo.');
+  var o=JSON.parse(t.slice(i,j+1)),arr=function(v){return Array.isArray(v)?v.map(function(x){return String(x).trim()}).filter(Boolean):[]};
+  pfDatos(a).ia={fecha:new Date().toISOString(),diagnostico:arr(o.diagnostico),fortalezas:arr(o.fortalezas),mejorar:arr(o.mejorar),bio:arr(o.bio),
+    horarios:(Array.isArray(o.horarios)?o.horarios:[]).filter(function(x){return x&&x.red}).slice(0,6),
+    ideas:(Array.isArray(o.ideas)?o.ideas:[]).filter(function(x){return x&&x.titulo}).slice(0,10)};
+  save();
+}
+function abrirIdea(x){
+  var tp=TIPOS_PUB.indexOf(x.tipo)>=0?x.tipo:'Post';
+  formPub({titulo:tituloIdea(x.titulo||x.t||''),tipo:tp,estado:'idea',notas:'Gancho: '+(x.gancho||x.g||'')+' · Cierre: '+(x.cierre||x.c||''),hora:/^\d{1,2}:\d{2}$/.test(x.hora||'')?('0'+x.hora).slice(-5):''});
+}
+document.addEventListener('input',function(ev){
+  var t=ev.target,k=t.getAttribute&&t.getAttribute('data-pf'),ki=t.getAttribute&&t.getAttribute('data-pfi'),kc=t.getAttribute&&t.getAttribute('data-pfc');
+  if(!k&&!ki&&!kc)return;var a=activa(),f=pfDatos(a);
+  if(k){var q=k.split('|');if(q.length>1)f[q[0]][q[1]]=t.value;else f[k]=t.value}
+  else if(ki){var z=ki.split('|');f.ins[z[0]]=f.ins[z[0]]||{dias:[]};f.ins[z[0]][z[1]]=t.value}
+  else{var cc=f.caps.filter(function(x){return x.id===kc})[0];if(cc)cc.nota=t.value}
+  clearTimeout(PF.t);PF.t=setTimeout(save,400);
+});
+document.addEventListener('change',function(ev){
+  var t=ev.target;
+  if(t.id==='pf_red')PF.red=t.value;
+  if(t.id==='pf_tipo')PF.tipo=t.value;
+  if(t.id==='pf_file'){
+    var a=activa(),f=pfDatos(a),fs=Array.prototype.slice.call(t.files||[]);t.value='';
+    if(!fs.length)return;
+    if(f.caps.length+fs.length>12){toast('Máximo 12 capturas por empresa.');fs=fs.slice(0,Math.max(0,12-f.caps.length))}
+    var red=PF.red,tipo=PF.tipo,ok=0;
+    fs.reduce(function(pr,fl){return pr.then(function(){return reducirImagen(fl,1100,0.75).then(function(u){var id=uid();return kvSet('img:perf_'+id,u).then(function(){f.caps.push({id:id,red:red,tipo:tipo,nota:'',fecha:new Date().toISOString()});ok++})}).catch(function(){})})},Promise.resolve()).then(function(){save();if(PL.tab==='perfil')pintarPL();toast(ok?ok+' captura(s) guardada(s)':'No se pudo guardar. Revisa el espacio del navegador.')});
+  }
+});
 function horasSug(a,fecha){
   var P=perfilHorarios(a),wd=fecha?new Date(fecha+'T12:00:00').getDay():null,hs=[];
   P.redes.forEach(function(r){r.slots.forEach(function(x){if(wd!=null&&x.d.indexOf(wd)<0)return;var t=h24(Math.round((x.h[0]+0.25)*2)/2);if(hs.indexOf(t)<0)hs.push(t)})});
@@ -909,7 +1100,7 @@ document.addEventListener('change',function(ev){if(ev.target.id==='p3')pintarHsu
 function vPlan(){
   var a=activa();
   return '<header class="ph"><div><h1>Planificador</h1><p class="sub">'+(a?'Publicaciones e ideas de '+esc(a.nombre)+'.':'Elige una empresa para ver su calendario.')+'</p></div><button class="btn pri" data-act="pnueva">Nueva publicación</button></header>'+
-   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button><button data-act="ptab" data-id="hor" class="'+(PL.tab==='hor'?'on':'')+'">Mejores horarios</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
+   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button><button data-act="ptab" data-id="hor" class="'+(PL.tab==='hor'?'on':'')+'">Mejores horarios</button><button data-act="ptab" data-id="perfil" class="'+(PL.tab==='perfil'?'on':'')+'">Perfil y análisis</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarPL(){
   var a=activa();if(!a)return;
@@ -931,6 +1122,7 @@ function estPub(x){return (S.estPub||{})[x.id]||x.estado||'idea'}
 function pintarPL(){
   var b=$('#plBody');if(!b||!PLD)return;
   if(PL.tab==='hor'){b.innerHTML=horariosHtml(activa());return}
+  if(PL.tab==='perfil'){b.innerHTML=perfilHtml(activa());cargarCaps();return}
   if(PL.tab==='ideas'){
     b.innerHTML=PLD.ideas.length?'<div class="grid">'+PLD.ideas.map(function(x,i){return '<article class="card"><div class="row-t">'+esc(x.texto)+'</div><div class="row-s">'+esc([x.plat,x.tipo,x.fecha].filter(Boolean).join(' · '))+'</div><div class="acts"><button class="btn sm pri" data-act="pprog" data-id="'+i+'">Programar</button>'+cp(x.texto)+'</div></article>'}).join('')+'</div>':'<div class="empty"><b>Sin ideas</b>Esta empresa no tiene ideas guardadas.</div>';
     return;
@@ -1733,8 +1925,8 @@ function errGemini(j,r){
 function esperar(ms){return new Promise(function(r){setTimeout(r,ms)})}
 function esSaturado(e){if(e&&e.cuota)return false;return e&&(e.status===503||e.status===429||/high demand|overload|unavailable|try again|quota|rate limit/i.test(e.message||''))}
 function conReintento(fn){return fn().catch(function(e){if(!esSaturado(e))throw e;toast('Gemini está saturado. Reintentando...');return esperar(3000).then(fn).catch(function(e2){if(!esSaturado(e2))throw e2;return esperar(6000).then(fn)})})}
-function pedirTexto(g,modelo,prompt){
-  return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(modelo)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':g.k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})}).then(function(r){
+function pedirTexto(g,modelo,prompt,imgs){
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(modelo)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':g.k},body:JSON.stringify({contents:[{parts:[{text:prompt}].concat((imgs||[]).map(function(m){return {inline_data:{mime_type:m.mime||'image/jpeg',data:m.data}}}))}]})}).then(function(r){
     return r.json().catch(function(){return {}}).then(function(j){
       if(!r.ok)throw errGemini(j,r);
       var pt=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts;
@@ -1743,11 +1935,11 @@ function pedirTexto(g,modelo,prompt){
     });
   },function(){var e=new Error('No hay conexión con Gemini. Revisa tu internet.');e.red=true;throw e});
 }
-function llamarGemini(prompt){
+function llamarGemini(prompt,imgs){
   var g=gk();if(!g.k)return Promise.reject(new Error('Falta la clave de Gemini. Pégala en Ajustes.'));
   var inten=0;
   function probar(m,rest){
-    return pedirTexto(g,m,prompt).catch(function(e){
+    return pedirTexto(g,m,prompt,imgs).catch(function(e){
       if(e.red)throw e;
       var sat=esSaturado(e),viejo=/no longer available|not found|no longer supported|not supported/i.test(e.message||'');
       if(sat&&inten<2){inten++;toast('Gemini está saturado. Reintentando...');return esperar(2500*inten).then(function(){return probar(m,rest)})}

@@ -888,12 +888,12 @@ function perfilHorarios(a){
   if(/trabajador|empleado|oficina|profesional|empresa/.test(pub))notas.push('Para público que trabaja, aprovecha antes de entrar (6 a 8 a. m.), el almuerzo y la salida (5 a 7 p. m.).');
   if(n==='licor')notas.push('Licores: dirige la publicación solo a mayores de 18 años (en los ajustes de audiencia de Instagram y Facebook) y no uses sugerencias sexuales ni de salud.');
   var st=((S.stats||{})[a.id]||[]).slice().sort(function(x,y){return x.month.localeCompare(y.month)}),nueva=!st.length,last=st[st.length-1]||null,
-    red=['Instagram','TikTok','Facebook','YouTube'].filter(function(k){return a[k.toLowerCase()]});
-  if(!red.length)red=['Instagram','Facebook'];
+    red=['Instagram','TikTok','Facebook'].concat(a.youtube?['YouTube']:[]);
+  var conU=red.filter(function(k){return a[k.toLowerCase()]}),sinU=red.filter(function(k){return !a[k.toLowerCase()]});red=conU.concat(sinU);
   var mejor=null;
   if(last&&last.plat)red.concat(['Instagram','TikTok','Facebook','YouTube']).forEach(function(k){var t=tasaPl(last.plat[k]);if(t!=null&&(mejor==null||t>tasaPl(last.plat[mejor])))mejor=k});
   var orden=red.slice();if(mejor&&orden.indexOf(mejor)>0){orden.splice(orden.indexOf(mejor),1);orden.unshift(mejor)}
-  var redes=orden.map(function(k,i){return {red:k,prior:i===0?'Principal':'Secundaria',slots:conReal(a,k,slotsRed(k,n,sh,rk))}});
+  var redes=orden.map(function(k,i){return {red:k,prior:i===0?'Principal':'Secundaria',sin:!a[k.toLowerCase()],slots:conReal(a,k,slotsRed(k,n,sh,rk))}});
   redes.push({red:'WhatsApp (estados)',prior:'Complementaria',slots:slotsRed('WhatsApp (estados)',n,sh,rk)});
   return {n:n,rk:rk,nueva:nueva,last:last,mejor:mejor,redes:redes,notas:notas,sh:sh};
 }
@@ -924,7 +924,7 @@ function horariosHtml(a){
   // por red
   h+='<h2>Por red social</h2><div class="grid">'+P.redes.map(function(r){
     var cfg=HRED[r.red]||HRED.Instagram;
-    return '<article class="card"><div class="row-t">'+esc(r.red)+' <span class="badge'+(r.prior==='Principal'?'':' mut')+'">'+r.prior+'</span></div><div class="row-s" style="margin:4px 0 8px">'+esc(cfg.freq)+'</div>'+
+    return '<article class="card"><div class="row-t">'+esc(r.red)+' <span class="badge'+(r.prior==='Principal'?'':' mut')+'">'+r.prior+'</span>'+(r.sin?' <span class="badge mut">Sin usuario en la ficha</span>':'')+'</div><div class="row-s" style="margin:4px 0 8px">'+esc(cfg.freq)+'</div>'+
      r.slots.map(function(x,i){return '<div class="insight'+(i===0?' ok':'')+'"><b>'+lblDias(x.d)+':</b> '+fmtH(x.h[0])+' a '+fmtH(x.h[1])+'<div class="row-s">'+esc(x.m)+'</div></div>'}).join('')+'<div class="row-s">'+esc(cfg.tip)+'</div></article>';
   }).join('')+'</div>';
   // plan de prueba o datos propios
@@ -954,6 +954,7 @@ function semanaSugerida(a){
     permit={'Instagram':['Reel','Carrusel','Post','Historia'],'TikTok':['TikTok','Reel'],'Facebook':['Post','Carrusel','Reel'],'YouTube':['Video','Reel'],'WhatsApp (estados)':['Historia']},
     tag={'Instagram':'IG','TikTok':'TT','Facebook':'FB','YouTube':'YT','WhatsApp (estados)':'WA'},usados={};
   P.redes.forEach(function(r){
+    if(r.sin&&P.redes.some(function(x){return !x.sin&&x.red!=='WhatsApp (estados)'}))return;
     var cfg=HRED[r.red]||HRED.Instagram,max=r.prior==='Principal'?cfg.n:r.prior==='Secundaria'?Math.ceil(cfg.n/2):4,c=0,pil={},eI=0;
     function idea(){
       if(r.red==='WhatsApp (estados)'){var e=ESTADOS_WA[eI%ESTADOS_WA.length];eI++;return {p:e.p,tipo:e.tipo,t:fillIdea(e.t,{p1:(listaTxt(a.productos)[0]||'nuestro producto')}),g:e.g,c:e.c}}
@@ -980,7 +981,7 @@ function semanaSugerida(a){
 var PF={red:'Instagram',tipo:'perfil',t:null,busy:false,err:''};
 var PF_TIPOS=[['perfil','Perfil (bio y foto)'],['publicaciones','Publicaciones recientes'],['insights','Estadísticas o Insights de la red'],['mejores','Publicaciones que mejor funcionaron'],['competencia','Perfil de la competencia']];
 function pfDatos(a){S.perfiles=S.perfiles||{};var f=S.perfiles[a.id];if(!f)f=S.perfiles[a.id]={bio:{},estilo:'',funciona:'',nofunciona:'',ins:{},caps:[],ia:null};if(!f.bio)f.bio={};if(!f.ins)f.ins={};if(!f.caps)f.caps=[];return f}
-function redesPerfil(a){var r=['Instagram','TikTok','Facebook','YouTube'].filter(function(k){return a[k.toLowerCase()]});return r.length?r:['Instagram','Facebook']}
+function redesPerfil(a){var r=['Instagram','Facebook','TikTok'];if(a.youtube)r.push('YouTube');return r}
 function reducirImagen(file,max,q){
   return new Promise(function(res,rej){
     var r=new FileReader();r.onerror=function(){rej()};
@@ -1004,7 +1005,7 @@ function analisisPerfil(a){
   if(!f.caps.length)out.push(['','Sube al menos una captura del perfil y otra de las estadísticas de cada red para que Gemini pueda analizarlas.']);
   reds.forEach(function(r){
     var bio=(f.bio[r]||'').trim();
-    if(!bio){out.push(['','Escribe la bio actual de '+r+' para revisarla.']);return}
+    if(!bio){out.push(['',a[r.toLowerCase()]?'Escribe la bio actual de '+r+' para revisarla.':r+': aún no hay usuario en la ficha. Escríbelo arriba, o crea la cuenta si el negocio todavía no la tiene.']);return}
     var nb=norm(bio);
     if(!/whatsapp|wa\.me|escrib|pide|pedido|reserva|agenda|cotiza|📲|👇/.test(nb)&&!/📲|👇/.test(bio))out.push(['mal',r+': la bio no tiene un llamado a la acción claro (por ejemplo "Haz tu pedido por WhatsApp 👇").']);
     if(a.ciudad&&nb.indexOf(norm(a.ciudad).split(' ')[0])<0)out.push(['mal',r+': la bio no dice en qué ciudad estás ('+a.ciudad+'). Ayuda a que te encuentren y a que confíen.']);
@@ -1033,7 +1034,7 @@ function perfilHtml(a){
    '<div class="acts"><button class="btn pri" data-act="pfsubir">Subir capturas</button></div><input type="file" id="pf_file" accept="image/*" multiple hidden>'+
    '<div class="grid" id="pfCaps" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">'+(f.caps.length?f.caps.map(function(c){return '<div class="card" style="padding:8px"><img data-cap="'+esc(c.id)+'" alt="" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--surf2)"><div class="row-s" style="margin:6px 0">'+esc(c.red)+' · '+esc((PF_TIPOS.filter(function(t){return t[0]===c.tipo})[0]||['',''])[1])+'</div><input type="text" data-pfc="'+esc(c.id)+'" placeholder="Nota (opcional)" value="'+esc(c.nota||'')+'"><div class="acts"><button class="btn sm del" data-act="pfdel" data-id="'+esc(c.id)+'">Quitar</button></div></div>'}).join(''):'<p class="row-s">Aún no hay capturas.</p>')+'</div></div>';
   h+='<div class="panel" style="padding:14px 16px;margin-bottom:12px"><h2 style="margin:0 0 8px;font-size:18px">2. Cuéntanos lo que ves</h2>'+
-   reds.map(function(r){var q=f.ins[r]||{dias:[]};return '<div class="card" style="margin-bottom:10px"><div class="row-t">'+r+'</div><div class="f"><label>Bio actual</label><textarea rows="2" data-pf="bio|'+r+'">'+esc(f.bio[r]||'')+'</textarea></div><div class="f"><label>Cuándo están más activos sus seguidores (lo ves en las estadísticas de la red)</label><div class="chips">'+DORD.map(function(d){return '<button type="button" class="rtog'+((q.dias||[]).map(Number).indexOf(d)>=0?' on':'')+'" data-act="pfdia" data-id="'+r+'|'+d+'">'+DSEM[d]+'</button>'}).join('')+'</div><div class="ld-two" style="margin-top:6px"><div class="f"><input type="time" aria-label="Desde" data-pfi="'+r+'|h1" value="'+esc(q.h1||'')+'"></div><div class="f"><input type="time" aria-label="Hasta" data-pfi="'+r+'|h2" value="'+esc(q.h2||'')+'"></div></div></div></div>'}).join('')+
+   reds.map(function(r){var q=f.ins[r]||{dias:[]};return '<div class="card" style="margin-bottom:10px"><div class="row-t">'+r+(a[r.toLowerCase()]?'':' <span class="badge mut">Sin usuario</span>')+'</div><div class="f"><label>Usuario o enlace de '+r+' (se guarda en la ficha)</label><input type="text" data-pfu="'+r+'" placeholder="@usuario o enlace" value="'+esc(a[r.toLowerCase()]||'')+'"></div><div class="f"><label>Bio actual</label><textarea rows="2" data-pf="bio|'+r+'">'+esc(f.bio[r]||'')+'</textarea></div><div class="f"><label>Cuándo están más activos sus seguidores (lo ves en las estadísticas de la red)</label><div class="chips">'+DORD.map(function(d){return '<button type="button" class="rtog'+((q.dias||[]).map(Number).indexOf(d)>=0?' on':'')+'" data-act="pfdia" data-id="'+r+'|'+d+'">'+DSEM[d]+'</button>'}).join('')+'</div><div class="ld-two" style="margin-top:6px"><div class="f"><input type="time" aria-label="Desde" data-pfi="'+r+'|h1" value="'+esc(q.h1||'')+'"></div><div class="f"><input type="time" aria-label="Hasta" data-pfi="'+r+'|h2" value="'+esc(q.h2||'')+'"></div></div></div></div>'}).join('')+
    '<div class="f"><label for="pf_estilo">¿Qué publican hoy?</label><textarea id="pf_estilo" rows="2" data-pf="estilo" placeholder="Ej: fotos del producto, algunas historias con promociones">'+esc(f.estilo||'')+'</textarea></div>'+
    '<div class="f"><label for="pf_funciona">Lo que mejor ha funcionado</label><textarea id="pf_funciona" rows="2" data-pf="funciona" placeholder="Ej: los videos del proceso y las ofertas de fin de semana">'+esc(f.funciona||'')+'</textarea></div>'+
    '<div class="f"><label for="pf_nofunciona">Lo que no ha funcionado</label><textarea id="pf_nofunciona" rows="2" data-pf="nofunciona">'+esc(f.nofunciona||'')+'</textarea></div></div>';
@@ -1068,9 +1069,10 @@ function abrirIdea(x){
   formPub({titulo:tituloIdea(x.titulo||x.t||''),tipo:tp,estado:'idea',notas:'Gancho: '+(x.gancho||x.g||'')+' · Cierre: '+(x.cierre||x.c||''),hora:/^\d{1,2}:\d{2}$/.test(x.hora||'')?('0'+x.hora).slice(-5):''});
 }
 document.addEventListener('input',function(ev){
-  var t=ev.target,k=t.getAttribute&&t.getAttribute('data-pf'),ki=t.getAttribute&&t.getAttribute('data-pfi'),kc=t.getAttribute&&t.getAttribute('data-pfc');
-  if(!k&&!ki&&!kc)return;var a=activa(),f=pfDatos(a);
-  if(k){var q=k.split('|');if(q.length>1)f[q[0]][q[1]]=t.value;else f[k]=t.value}
+  var t=ev.target,k=t.getAttribute&&t.getAttribute('data-pf'),ki=t.getAttribute&&t.getAttribute('data-pfi'),kc=t.getAttribute&&t.getAttribute('data-pfc'),ku=t.getAttribute&&t.getAttribute('data-pfu');
+  if(!k&&!ki&&!kc&&!ku)return;var a=activa(),f=pfDatos(a);
+  if(ku){a[ku.toLowerCase()]=t.value}
+  else if(k){var q=k.split('|');if(q.length>1)f[q[0]][q[1]]=t.value;else f[k]=t.value}
   else if(ki){var z=ki.split('|');f.ins[z[0]]=f.ins[z[0]]||{dias:[]};f.ins[z[0]][z[1]]=t.value}
   else{var cc=f.caps.filter(function(x){return x.id===kc})[0];if(cc)cc.nota=t.value}
   clearTimeout(PF.t);PF.t=setTimeout(save,400);

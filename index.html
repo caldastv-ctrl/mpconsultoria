@@ -102,6 +102,8 @@ button{cursor:pointer}
 .hl{background:rgba(245,184,61,.2);color:var(--acc-t);padding:0 4px;border-radius:6px}.hl2{background:rgba(62,207,158,.18);color:var(--ok)}
 .sg-h{background:rgba(245,184,61,.18);color:var(--acc-t);border-radius:6px;padding:0 3px}.sg-c{background:rgba(62,207,158,.16);color:var(--ok);border-radius:6px;padding:0 3px}.sg-a{color:var(--mut);font-size:.88em}
 .rtog{cursor:pointer;border:1px solid var(--line);background:var(--surf);color:var(--mut);font-size:12px;border-radius:20px;padding:3px 10px}.rtog.on{background:rgba(245,184,61,.18);color:var(--acc-t);border-color:var(--acc);font-weight:700}
+a.btn{text-decoration:none}a.btn.pri{color:var(--acc-tx)}a.btn:not(.pri){color:var(--tx)}
+.subnav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}.subnav a{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surf);color:var(--mut);font-weight:700;font-size:14px;text-decoration:none}.subnav a:hover{color:var(--tx)}.subnav a.on{background:var(--acc);color:var(--acc-tx);border-color:var(--acc)}
 .fs{border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:8px 12px}.fs legend{padding:0 6px;font-weight:700;color:var(--acc-t)}
 .ld-grid{display:grid;gap:16px;grid-template-columns:minmax(300px,440px) 1fr}@media(max-width:1000px){.ld-grid{grid-template-columns:1fr}}.ld-prev{position:sticky;top:12px;align-self:start}
 .ld-form .f{margin-bottom:12px}
@@ -254,6 +256,7 @@ var MODS=[
   {id:'inicio',n:'Inicio'},
   {id:'empresas',n:'Empresas'},
   {id:'diagnostico',n:'Diagnóstico y estrategia',d:'Benchmark contra el sector, recomendaciones, estrategias por plataforma e informes para el cliente.',o:'HMPI Pro',u:'las redes, el tipo de negocio y las cifras de la ficha'},
+  {id:'perfil',n:'Perfil y análisis'},
   {id:'planificador',n:'Planificador',d:'Calendario de publicaciones, ideas con IA y estadísticas por mes.',o:'Nadine',u:'el nombre, el logo y las redes de la ficha'},
   {id:'estadisticas',n:'Estadísticas'},
   {id:'contenido',n:'Ideas y copys'},
@@ -312,6 +315,42 @@ function av(e,cls){
 function svg(id){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+IC[id]+'"/></svg>'}
 
 /* Menú lateral */
+var GRUPOS=[
+ {n:'Inicio',ic:'inicio',m:['inicio']},
+ {n:'Empresas',ic:'empresas',m:['empresas','perfil','diagnostico']},
+ {n:'Planificar',ic:'planificador',m:['planificador','contenido','textos','automatizacion']},
+ {n:'Crear',ic:'diseno',m:['guiones','diseno','landing']},
+ {n:'Resultados',ic:'estadisticas',m:['estadisticas','comparativo']},
+ {n:'Ajustes',ic:'ajustes',m:['ajustes']}
+];
+var SUBN={empresas:'Fichas',planificador:'Calendario'};
+function grupoDe(r){return GRUPOS.filter(function(g){return g.m.indexOf(r)>=0})[0]||GRUPOS[0]}
+function subnav(r){
+  var g=grupoDe(r);if(g.m.length<2)return '';
+  return '<nav class="subnav" aria-label="'+esc(g.n)+'">'+g.m.map(function(id){var m=MODS.filter(function(x){return x.id===id})[0];return '<a href="#'+id+'" class="'+(id===r?'on':'')+'">'+esc(SUBN[id]||m.n)+'</a>'}).join('')+'</nav>';
+}
+function vPerfilMod(){var a=activa();return '<header class="ph"><div><h1>Perfil y análisis</h1><p class="sub">Sube los perfiles de '+(a?esc(a.nombre):'la empresa')+' para ver qué está pasando y qué publicar.</p></div></header><div id="pfBody"></div>'}
+function pintarPerfil(){var b=$('#pfBody');if(b){b.innerHTML=perfilHtml(activa());cargarCaps();return}pintarPL()}
+function pasosEmpresa(a){
+  var st=(S.stats||{})[a.id]||[],plan=(S.plan||[]).filter(function(x){return x.empresa===a.id}),perf=(S.perfiles||{})[a.id],ld=(S.landings||{})[a.id],
+    conDatos=Object.keys(S.stats||{}).filter(function(k){return (S.stats[k]||[]).length}).length,
+    cont=(S.guiones||[]).some(function(g){return g.empresa===a.id})||(((S.disenos||{})[a.id]||{}).list||[]).length>0||(((S.proyectos||{})[a.id])||[]).length>0;
+  return [
+   {t:'Completa la ficha de la empresa',ok:pct(a)>=75&&!!a.whatsapp,h:'#empresas',b:'Abrir ficha',s:'Ficha al '+pct(a)+'%'+(a.whatsapp?'':' · falta el WhatsApp')},
+   {t:'Sube los perfiles de sus redes',ok:!!(perf&&perf.caps&&perf.caps.length),h:'#perfil',b:'Subir perfiles',s:'Capturas del perfil y de las estadísticas'},
+   {t:'Registra las estadísticas del mes',ok:st.length>0,h:'#estadisticas',b:'Registrar mes',s:'Datos por red: seguidores, alcance, interacciones'},
+   {t:'Crea la semana de publicaciones',ok:plan.length>0,h:'#planificador',b:'Ir al calendario',s:'Con ideas y horarios sugeridos'},
+   {t:'Crea un guion o un diseño',ok:cont,h:'#guiones',b:'Crear contenido',s:'Guiones por región, voz, carruseles y posts'},
+   {t:'Deja lista la landing de ventas',ok:!!ld&&!!a.whatsapp,h:'#landing',b:'Abrir landing',s:'La página que va en la biografía y en los anuncios'},
+   {t:'Compara tus empresas y descarga el informe',ok:conDatos>=2,h:'#comparativo',b:'Ver comparativo',s:'Necesita estadísticas de al menos dos empresas'}
+  ];
+}
+function pasosHtml(a){
+  if(!a)return '';
+  var ps=pasosEmpresa(a),hechos=ps.filter(function(x){return x.ok}).length,sig=ps.filter(function(x){return !x.ok})[0];
+  return '<h2>Primeros pasos de '+esc(a.nombre)+'</h2><div class="panel"><div class="row"><div class="row-main"><div class="row-t">'+hechos+' de '+ps.length+' pasos listos</div><div class="bar"><i style="width:'+Math.round(hechos/ps.length*100)+'%"></i></div></div></div>'+
+   ps.map(function(x){return '<div class="row"><span class="badge '+(x.ok?'ok':'mut')+'" style="min-width:26px;text-align:center">'+(x.ok?'✓':'·')+'</span><div class="row-main"><div class="row-t">'+x.t+'</div><div class="row-s">'+esc(x.s)+'</div></div><a class="btn sm'+(sig===x&&!x.ok?' pri':'')+'" href="'+x.h+'">'+(x.ok?'Abrir':x.b)+'</a></div>'}).join('')+'</div>';
+}
 function renderSide(){
   var a=activa();
   var items=S.empresas.map(function(e){
@@ -322,8 +361,8 @@ function renderSide(){
     '<span class="switch-txt"><span class="switch-lbl">Empresa activa</span><div class="switch-nm">'+(a?esc(a.nombre):'Sin empresa')+'</div></span><span aria-hidden="true">&#9662;</span></button>'+
     '<div class="menu" id="swMenu" hidden>'+items+(items?'<div class="sep"></div>':'')+'<button type="button" data-act="nueva"><span class="av sm" style="background:var(--acc);color:var(--acc-tx)">+</span><span>Nueva empresa</span></button></div>';
   var cur=route();
-  $('#nav').innerHTML=MODS.map(function(m){
-    return '<a href="#'+m.id+'" class="'+(cur===m.id?'on':'')+'">'+svg(m.id)+'<span>'+m.n+'</span>'+(m.d&&m.id!=='ajustes'&&m.id!=='guiones'&&m.id!=='planificador'&&m.id!=='diagnostico'&&m.id!=='comparativo'&&m.id!=='diseno'?'<span class="tag">Etapa 2</span>':'')+'</a>';
+  $('#nav').innerHTML=GRUPOS.map(function(g){
+    return '<a href="#'+g.m[0]+'" class="'+(g.m.indexOf(cur)>=0?'on':'')+'">'+svg(g.ic)+'<span>'+g.n+'</span></a>';
   }).join('');
 }
 
@@ -342,8 +381,7 @@ function vInicio(){
   }).join('');
   return '<header class="ph"><div><h1>Panel general</h1><p class="sub">Todas tus empresas y herramientas en un solo lugar.</p></div><button class="btn pri" data-act="nueva">Nueva empresa</button></header>'+
     respaldoAviso()+'<section class="stats"><div class="stat"><b>'+n+'</b><span>Empresas registradas</span></div><div class="stat"><b>'+(a?esc(a.nombre):'-')+'</b><span>Empresa activa</span></div><div class="stat"><b>'+full+' de '+n+'</b><span>Fichas completas</span></div></section>'+
-    '<h2>Tus empresas</h2>'+(n?'<div class="panel">'+rows+'</div>':emptyHtml())+
-    '<h2>Módulos</h2><div class="panel"><div class="row"><div class="row-main"><div class="row-t"><a href="#empresas" style="color:inherit">Empresas</a></div><div class="row-s">Ficha única de cada empresa</div></div><span class="badge ok">Listo</span></div>'+mods+'</div>';
+    pasosHtml(a)+'<h2>Tus empresas</h2>'+(n?'<div class="panel">'+rows+'</div>':emptyHtml());
 }
 function emptyHtml(){return '<div class="empty"><b>Aún no hay empresas</b>Registra la primera para que todos los módulos trabajen con sus datos.<br><br><button class="btn pri" data-act="nueva">Nueva empresa</button></div>'}
 
@@ -400,13 +438,14 @@ function vAjustes(){
    hintFinal();
 }
 function renderMain(){
-  var r=route(),h=r==='inicio'?vInicio():r==='empresas'?vEmpresas():r==='ajustes'?vAjustes():r==='guiones'?vGuiones():r==='planificador'?vPlan():r==='diagnostico'?vDiag():r==='comparativo'?vComp():r==='landing'?vLand():r==='diseno'?vDis():r==='estadisticas'?vEst():r==='contenido'?vIA():r==='automatizacion'?vAuto():r==='textos'?vTextos():vModulo(r);
-  $('#main').innerHTML=h;
+  var r=route(),h=r==='inicio'?vInicio():r==='empresas'?vEmpresas():r==='ajustes'?vAjustes():r==='guiones'?vGuiones():r==='planificador'?vPlan():r==='diagnostico'?vDiag():r==='comparativo'?vComp():r==='landing'?vLand():r==='perfil'?vPerfilMod():r==='diseno'?vDis():r==='estadisticas'?vEst():r==='contenido'?vIA():r==='automatizacion'?vAuto():r==='textos'?vTextos():vModulo(r);
+  $('#main').innerHTML=subnav(r)+h;
   if(r==='guiones')cargarGV();
   if(r==='planificador')cargarPL();
   if(r==='diagnostico')cargarDG();
   if(r==='comparativo')cargarCP();
   if(r==='landing')cargarLanding();
+  if(r==='perfil')pintarPerfil();
   if(r==='diseno')pintarDis();
   if(r==='estadisticas')cargarES();
   if(r==='ajustes')pintarFondoApp();
@@ -620,19 +659,19 @@ document.addEventListener('click',function(ev){
   else if(act==='dtborrar'){guardarDiag(function(o){o.tareas=o.tareas.filter(function(t){return String(t.id)!==id})})}
   else if(act==='ptab'){PL.tab=id;renderMain()}
   else if(act==='pfsubir'){var pfi=$('#pf_file');if(pfi)pfi.click()}
-  else if(act==='pfdel'){var a21=activa(),f21=pfDatos(a21);if(confirm('¿Quitar esta captura?')){f21.caps=f21.caps.filter(function(x){return x.id!==id});kvSet('img:perf_'+id,null).catch(function(){});save();pintarPL()}}
-  else if(act==='pfdia'){var z2=id.split('|'),f22=pfDatos(activa());f22.ins[z2[0]]=f22.ins[z2[0]]||{dias:[]};var ds=(f22.ins[z2[0]].dias||[]).map(Number),d2=Number(z2[1]),ix2=ds.indexOf(d2);if(ix2<0)ds.push(d2);else ds.splice(ix2,1);f22.ins[z2[0]].dias=ds;save();pintarPL()}
+  else if(act==='pfdel'){var a21=activa(),f21=pfDatos(a21);if(confirm('¿Quitar esta captura?')){f21.caps=f21.caps.filter(function(x){return x.id!==id});kvSet('img:perf_'+id,null).catch(function(){});save();pintarPerfil()}}
+  else if(act==='pfdia'){var z2=id.split('|'),f22=pfDatos(activa());f22.ins[z2[0]]=f22.ins[z2[0]]||{dias:[]};var ds=(f22.ins[z2[0]].dias||[]).map(Number),d2=Number(z2[1]),ix2=ds.indexOf(d2);if(ix2<0)ds.push(d2);else ds.splice(ix2,1);f22.ins[z2[0]].dias=ds;save();pintarPerfil()}
   else if(act==='pfidea'){abrirIdea(ideasPara(activa())[Number(id)])}
   else if(act==='pfiaidea'){var ia1=pfDatos(activa()).ia;if(ia1&&ia1.ideas[Number(id)])abrirIdea(ia1.ideas[Number(id)])}
   else if(act==='pfiasemana'){var a23=activa(),ia2=pfDatos(a23).ia;if(!ia2||!ia2.ideas.length)return;var P23=perfilHorarios(a23),hoy23=new Date();hoy23.setHours(12,0,0,0);var nw23=ia2.ideas.slice(0,7).map(function(x,i){var d=new Date(hoy23.getTime()+(i+1)*86400000),iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2),tp=TIPOS_PUB.indexOf(x.tipo)>=0?x.tipo:'Post',hr=/^\d{1,2}:\d{2}$/.test(x.hora||'')?('0'+x.hora).slice(-5):h24(P23.redes[0].slots[0].h[0]+0.25);return {id:uid(),empresa:a23.id,titulo:tituloIdea(x.titulo),tipo:tp,fecha:iso,hora:hr,estado:'idea',notas:'Gancho: '+(x.gancho||'')+' · Cierre: '+(x.cierre||'')}});if(confirm('Se crearán '+nw23.length+' borradores en el Planificador, uno por día. ¿Continuar?')){S.plan=(S.plan||[]).concat(nw23);PL.mes=nw23[0].fecha.slice(0,7);PL.tab='pub';save();renderMain();toast(nw23.length+' borradores creados')}}
   else if(act==='pfia'){
     var a24=activa(),f24=pfDatos(a24),caps24=f24.caps.slice().sort(function(x,y){var o={insights:0,perfil:1,publicaciones:2,mejores:3,competencia:4};return (o[x.tipo]||9)-(o[y.tipo]||9)}).slice(0,6);
-    PF.busy=true;PF.err='';pintarPL();
+    PF.busy=true;PF.err='';pintarPerfil();
     Promise.all(caps24.map(function(c){return kvGet('img:perf_'+c.id).then(function(u){return u?{mime:'image/jpeg',data:String(u).split(',')[1]}:null})})).then(function(imgs){
       imgs=imgs.filter(Boolean);caps24=caps24.filter(function(c,i){return true});
       if(!imgs.length)toast('Sin capturas: el análisis usará solo los datos escritos.');
       return llamarGemini(promptPerfil(a24,caps24),imgs);
-    }).then(function(t){aplicarPerfilIA(a24,t);PF.busy=false;pintarPL();toast('Análisis listo. Revísalo antes de aplicarlo.')},function(e){PF.busy=false;PF.err=(e&&e.message)||'No se pudo analizar.';pintarPL()});
+    }).then(function(t){aplicarPerfilIA(a24,t);PF.busy=false;pintarPerfil();toast('Análisis listo. Revísalo antes de aplicarlo.')},function(e){PF.busy=false;PF.err=(e&&e.message)||'No se pudo analizar.';pintarPerfil()});
   }
   else if(act==='phora'){var ph=$('#p4');if(ph)ph.value=id}
   else if(act==='pweek'){var a8=activa(),nw=semanaSugerida(a8);if(!nw.length)return toast('Ya tienes esas publicaciones en el Planificador.');if(confirm('Se crearán '+nw.length+' borradores en el Planificador para los próximos 7 días, con los horarios sugeridos. ¿Continuar?')){S.plan=(S.plan||[]).concat(nw);PL.mes=nw[0].fecha.slice(0,7);PL.tab='pub';save();renderMain();toast(nw.length+' borradores creados')}}
@@ -1086,7 +1125,7 @@ document.addEventListener('change',function(ev){
     if(!fs.length)return;
     if(f.caps.length+fs.length>12){toast('Máximo 12 capturas por empresa.');fs=fs.slice(0,Math.max(0,12-f.caps.length))}
     var red=PF.red,tipo=PF.tipo,ok=0;
-    fs.reduce(function(pr,fl){return pr.then(function(){return reducirImagen(fl,1100,0.75).then(function(u){var id=uid();return kvSet('img:perf_'+id,u).then(function(){f.caps.push({id:id,red:red,tipo:tipo,nota:'',fecha:new Date().toISOString()});ok++})}).catch(function(){})})},Promise.resolve()).then(function(){save();if(PL.tab==='perfil')pintarPL();toast(ok?ok+' captura(s) guardada(s)':'No se pudo guardar. Revisa el espacio del navegador.')});
+    fs.reduce(function(pr,fl){return pr.then(function(){return reducirImagen(fl,1100,0.75).then(function(u){var id=uid();return kvSet('img:perf_'+id,u).then(function(){f.caps.push({id:id,red:red,tipo:tipo,nota:'',fecha:new Date().toISOString()});ok++})}).catch(function(){})})},Promise.resolve()).then(function(){save();pintarPerfil();toast(ok?ok+' captura(s) guardada(s)':'No se pudo guardar. Revisa el espacio del navegador.')});
   }
 });
 function horasSug(a,fecha){
@@ -1102,7 +1141,7 @@ document.addEventListener('change',function(ev){if(ev.target.id==='p3')pintarHsu
 function vPlan(){
   var a=activa();
   return '<header class="ph"><div><h1>Planificador</h1><p class="sub">'+(a?'Publicaciones e ideas de '+esc(a.nombre)+'.':'Elige una empresa para ver su calendario.')+'</p></div><button class="btn pri" data-act="pnueva">Nueva publicación</button></header>'+
-   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button><button data-act="ptab" data-id="hor" class="'+(PL.tab==='hor'?'on':'')+'">Mejores horarios</button><button data-act="ptab" data-id="perfil" class="'+(PL.tab==='perfil'?'on':'')+'">Perfil y análisis</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
+   '<div class="tabs"><button data-act="ptab" data-id="pub" class="'+(PL.tab==='pub'?'on':'')+'">Publicaciones</button><button data-act="ptab" data-id="ideas" class="'+(PL.tab==='ideas'?'on':'')+'">Ideas</button><button data-act="ptab" data-id="hor" class="'+(PL.tab==='hor'?'on':'')+'">Mejores horarios</button></div><div id="plBody"><p class="sub">Cargando...</p></div>';
 }
 function cargarPL(){
   var a=activa();if(!a)return;
